@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="台灣小農購買指南，依節氣找當季蔬果、參考批發行情，直接前往小農的購買管道。">
+<meta name="theme-color" content="#183d2e">
+<title>蔬果行情｜雲端菜市場</title>
+<link rel="stylesheet" href="market.css?v=4">
+<script defer src="market.js?v=4"></script>
+</head>
+<body>
+<header><nav aria-label="市場導覽"><a href="index.html">首頁</a><a href="farms.html">找小農</a><a href="season.html">看當季推薦</a><a href="prices.html" aria-current="page">查蔬果行情</a></nav><div class="intro"><h1>蔬果行情</h1><p>查看農業部公布的批發行情。</p><form class="site-search" action="farms.html" method="get" role="search"><input type="search" name="q" aria-label="搜尋蔬果或店家" placeholder="搜尋蔬果或店家"><button type="submit">搜尋</button></form></div></header>
+<main>
+<section id="prices">
+  <p class="section-note muted">台北二市場交易均價，單位為新臺幣／公斤。價格以各筆交易日期為準。</p>
+  <p class="meta" id="quote-status" role="status">正在載入批發行情。</p>
+  <div id="quotes" class="grid"></div>
+  <p><a href="https://data.moa.gov.tw/open_search.aspx?id=037">查看農業部完整行情</a></p>
+</section>
+</main>
+<footer>雲端菜市場 · 台灣小農購買指南</footer>
+</body>
+</html>

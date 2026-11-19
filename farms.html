@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="台灣小農購買指南，依節氣找當季蔬果、參考批發行情，直接前往小農的購買管道。">
+<meta name="theme-color" content="#183d2e">
+<title>小農名錄｜雲端菜市場</title>
+<link rel="stylesheet" href="market.css?v=4">
+<script defer src="market.js?v=4"></script>
+</head>
+<body>
+<header><nav aria-label="市場導覽"><a href="index.html">首頁</a><a href="farms.html" aria-current="page">找小農</a><a href="season.html">看當季推薦</a><a href="prices.html">查蔬果行情</a></nav><div class="intro"><h1>小農名錄</h1><p>搜尋蔬果或店家，找到各自的購買管道。</p></div></header>
+<main>
+<section id="directory">
+  
+  <form class="filters" id="filters" role="search" aria-label="搜尋小農">
+    <div><label for="search">輸入蔬果或店家名稱</label><div class="search-row"><input id="search" type="search" placeholder="例如：高麗菜、芭樂"><button id="clear" type="button">清除</button></div></div>
+    <div><label for="category">販售類別</label><select id="category"><option value="">全部類別</option></select></div>
+  </form>
+  <p id="count" role="status">正在載入小農名錄。</p>
+  <div class="grid" id="farms"></div>
+  <button id="more" type="button" hidden>顯示更多店家</button>
+  <p class="meta">名錄整理至 2026/10/05。販售品項以店家公告為準。</p>
+</section><details class="notice"><summary>購買須知與防詐騙提醒</summary><p>本網站整理小農資訊。請透過各店家的購買管道交易，避免直接匯款給來路不明的帳號。若遇到可疑連結或解除分期付款要求，請保護個人資料並撥打 165 反詐騙專線。</p></details>
+</main>
+<footer>雲端菜市場 · 台灣小農購買指南</footer>
+</body>
+</html>

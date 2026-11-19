@@ -34,12 +34,12 @@ function solarTerm(date) {
 
 const now = new Date();
 const month = Number(new Intl.DateTimeFormat('en', {timeZone:'Asia/Taipei',month:'numeric'}).format(now));
-$('term').textContent = solarTerm(now);
+if ($('term')) $('term').textContent = solarTerm(now);
 const taipeiDay = new Intl.DateTimeFormat('sv-SE', {
   timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit',
 }).format(now);
 const weeklyIsCurrent = taipeiDay >= '2026-11-19' && taipeiDay <= '2026-11-22';
-if (!weeklyIsCurrent) {
+if ($('weekly-status') && !weeklyIsCurrent) {
   $('weekly-status').textContent = '歷史週報｜2026 年 11 月 19 日至 22 日。近期價格請查看蔬果批發行情。';
 }
 const selected = monthly[month - 1].map((key) => produce[key]);
@@ -72,32 +72,30 @@ function safeLink(label, value) {
 
 const match = (value, query) => value.toLocaleLowerCase('zh-TW').includes(query.toLocaleLowerCase('zh-TW'));
 
-for (const [name, category, , query, note] of selected) {
-  const card = element('article', '', 'card pick');
-  const button = element('button', '查找' + name + '店家');
-  button.type = 'button';
-  button.addEventListener('click', () => {
-    $('search').value = query;
-    $('category').value = '';
-    resetResults();
-    $('search').focus();
-  });
-  card.append(element('span', category, 'tag'), element('h3', name), element('p', note), button);
-  $('picks').append(card);
-}
-
-const priceItems = new Map(selected.map(([name, , code]) => [code, name]));
-if (weeklyIsCurrent) {
-  for (const [code, name] of [['E1', '柳橙'], ['C1', '椪柑'], ['W1', '網紋紅肉洋香瓜'], ['W2', '網紋綠肉洋香瓜']]) {
-    priceItems.set(code, name);
+if ($('picks')) {
+  for (const [name, category, , query, note] of selected) {
+    const card = element('article', '', 'card pick');
+    const link = element('a', '找' + name + '店家', 'pick-link');
+    link.href = 'farms.html?q=' + encodeURIComponent(query);
+    card.append(element('span', category, 'tag'), element('h3', name), element('p', note), link);
+    $('picks').append(card);
   }
 }
-for (const [code, name] of priceItems) {
-  const card = element('article', '', 'card');
-  const price = element('p', '讀取行情中', 'price');
-  priceElements.set(code, price);
-  card.append(element('h3', name), price);
-  $('quotes').append(card);
+
+function showPriceCards() {
+  const priceItems = new Map(selected.map(([name, , code]) => [code, name]));
+  if (weeklyIsCurrent) {
+    for (const [code, name] of [['E1', '柳橙'], ['C1', '椪柑'], ['W1', '網紋紅肉洋香瓜'], ['W2', '網紋綠肉洋香瓜']]) {
+      priceItems.set(code, name);
+    }
+  }
+  for (const [code, name] of priceItems) {
+    const card = element('article', '', 'card');
+    const price = element('p', '讀取行情中', 'price');
+    priceElements.set(code, price);
+    card.append(element('h3', name), price);
+    $('quotes').append(card);
+  }
 }
 
 function renderFarms() {
@@ -134,29 +132,6 @@ function resetResults() {
   visibleCount = pageSize;
   renderFarms();
 }
-
-$('filters').addEventListener('submit', (event) => {
-  event.preventDefault();
-  resetResults();
-});
-$('search').addEventListener('input', resetResults);
-$('category').addEventListener('change', resetResults);
-$('clear').addEventListener('click', () => {
-  $('search').value = '';
-  $('category').value = '';
-  resetResults();
-  $('search').focus();
-});
-$('more').addEventListener('click', () => {
-  const firstNewCard = visibleCount;
-  visibleCount += pageSize;
-  renderFarms();
-  const heading = $('farms').children[firstNewCard]?.querySelector('h3');
-  if (heading) {
-    heading.tabIndex = -1;
-    heading.focus();
-  }
-});
 
 async function loadFarms() {
   try {
@@ -205,5 +180,33 @@ async function loadPrices() {
   }
 }
 
-loadFarms();
-loadPrices();
+if ($('filters')) {
+  $('search').value = new URLSearchParams(location.search).get('q') || '';
+  $('filters').addEventListener('submit', (event) => {
+    event.preventDefault();
+    resetResults();
+  });
+  $('search').addEventListener('input', resetResults);
+  $('category').addEventListener('change', resetResults);
+  $('clear').addEventListener('click', () => {
+    $('search').value = '';
+    $('category').value = '';
+    resetResults();
+    $('search').focus();
+  });
+  $('more').addEventListener('click', () => {
+    const firstNewCard = visibleCount;
+    visibleCount += pageSize;
+    renderFarms();
+    const heading = $('farms').children[firstNewCard]?.querySelector('h3');
+    if (heading) {
+      heading.tabIndex = -1;
+      heading.focus();
+    }
+  });
+  loadFarms();
+}
+if ($('quotes')) {
+  showPriceCards();
+  loadPrices();
+}
