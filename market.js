@@ -6,6 +6,7 @@ const produce = {
   tomato: ['小番茄', '水果', '72', '小番茄', '適合鮮食，也可以做成沙拉。'],
   strawberry: ['草莓', '水果', '45', '草莓', '冬春常見，購買前可先確認採收與配送日。'],
   guava: ['芭樂', '水果', 'P1', '芭樂', '台灣全年可見，想吃脆口可找珍珠芭樂。'],
+  ponkan: ['椪柑', '水果', 'C1', '椪柑', '秋冬常見，果皮帶綠也可能已成熟。'],
   orange: ['柳丁', '水果', 'E1', '柳丁', '秋末至冬季常見，可鮮食或榨汁。'],
   pineapple: ['鳳梨', '水果', 'B2', '鳳梨', '春夏可留意金鑽鳳梨。'],
   cucumber: ['小黃瓜', '蔬菜', 'FD1', '小黃瓜', '適合涼拌，挑選時可留意果身是否緊實。'],
@@ -21,7 +22,7 @@ const monthly = [
   ['cucumber','pineapple','watermelon'], ['luffa','watermelon','mango'],
   ['luffa','watermelon','mango'], ['luffa','mango','guava'],
   ['pumpkin','pomelo','guava'], ['pumpkin','guava','orange'],
-  ['cabbage','orange','guava'], ['cabbage','tomato','orange'],
+  ['cabbage','orange','ponkan'], ['cabbage','tomato','orange'],
 ];
 
 function solarTerm(date) {
@@ -34,6 +35,13 @@ function solarTerm(date) {
 const now = new Date();
 const month = Number(new Intl.DateTimeFormat('en', {timeZone:'Asia/Taipei',month:'numeric'}).format(now));
 $('term').textContent = solarTerm(now);
+const taipeiDay = new Intl.DateTimeFormat('sv-SE', {
+  timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit',
+}).format(now);
+const weeklyIsCurrent = taipeiDay >= '2026-11-19' && taipeiDay <= '2026-11-22';
+if (!weeklyIsCurrent) {
+  $('weekly-status').textContent = '歷史週報｜2026 年 11 月 19 日至 22 日。近期價格請查看蔬果批發行情。';
+}
 const selected = monthly[month - 1].map((key) => produce[key]);
 const priceElements = new Map();
 const number = new Intl.NumberFormat('zh-TW', {maximumFractionDigits:1});
@@ -64,10 +72,8 @@ function safeLink(label, value) {
 
 const match = (value, query) => value.toLocaleLowerCase('zh-TW').includes(query.toLocaleLowerCase('zh-TW'));
 
-for (const [name, category, code, query, note] of selected) {
+for (const [name, category, , query, note] of selected) {
   const card = element('article', '', 'card pick');
-  const price = element('p', '讀取行情中', 'price');
-  priceElements.set(code, price);
   const button = element('button', '查找' + name + '店家');
   button.type = 'button';
   button.addEventListener('click', () => {
@@ -76,8 +82,22 @@ for (const [name, category, code, query, note] of selected) {
     resetResults();
     $('search').focus();
   });
-  card.append(element('span', category, 'tag'), element('h3', name), element('p', note), price, button);
+  card.append(element('span', category, 'tag'), element('h3', name), element('p', note), button);
   $('picks').append(card);
+}
+
+const priceItems = new Map(selected.map(([name, , code]) => [code, name]));
+if (weeklyIsCurrent) {
+  for (const [code, name] of [['E1', '柳橙'], ['C1', '椪柑'], ['W1', '網紋紅肉洋香瓜'], ['W2', '網紋綠肉洋香瓜']]) {
+    priceItems.set(code, name);
+  }
+}
+for (const [code, name] of priceItems) {
+  const card = element('article', '', 'card');
+  const price = element('p', '讀取行情中', 'price');
+  priceElements.set(code, price);
+  card.append(element('h3', name), price);
+  $('quotes').append(card);
 }
 
 function renderFarms() {
