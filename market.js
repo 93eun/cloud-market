@@ -37,7 +37,10 @@ $('term').textContent = solarTerm(now);
 const selected = monthly[month - 1].map((key) => produce[key]);
 const priceElements = new Map();
 const number = new Intl.NumberFormat('zh-TW', {maximumFractionDigits:1});
+const pageSize = 9;
+let visibleCount = pageSize;
 let farms = [];
+let directoryReady = false;
 
 function element(tag, value, className) {
   const item = document.createElement(tag);
@@ -70,8 +73,7 @@ for (const [name, category, code, query, note] of selected) {
   button.addEventListener('click', () => {
     $('search').value = query;
     $('category').value = '';
-    $('county').value = '';
-    renderFarms();
+    resetResults();
     $('search').focus();
   });
   card.append(element('span', category, 'tag'), element('h3', name), element('p', note), price, button);
@@ -81,13 +83,13 @@ for (const [name, category, code, query, note] of selected) {
 function renderFarms() {
   const query = $('search').value.trim();
   const category = $('category').value;
-  const county = $('county').value;
+  if (!directoryReady) return;
   const results = farms.filter((farm) =>
     (!category || farm.categories.includes(category)) &&
-    (!county || farm['產地縣市'] === county) &&
-    match([farm['品牌名稱'], farm['販售品項'], farm['產地縣市'], farm['備註']].join(' '), query));
+    match([farm['品牌名稱'], farm['販售品項']].join(' '), query));
   $('count').textContent = results.length ? '找到 ' + results.length + ' 筆' : '找不到符合的店家，可以換個品項或清除篩選。';
-  $('farms').replaceChildren(...results.map((farm) => {
+  $('more').hidden = results.length <= visibleCount;
+  $('farms').replaceChildren(...results.slice(0, visibleCount).map((farm) => {
     const card = element('article', '', 'card');
     card.append(element('h3', farm['品牌名稱']));
     for (const tag of [farm['產地縣市'], ...farm.categories].filter(Boolean)) card.append(element('span', tag, 'tag'));
@@ -97,7 +99,10 @@ function renderFarms() {
     const links = element('div', '', 'links');
     const purchase = safeLink('前往購買管道', farm['傳送門']);
     const profile = safeLink('Threads 帳號', farm['@帳號']);
-    if (purchase) links.append(purchase);
+    if (purchase) {
+      purchase.className = 'purchase';
+      links.append(purchase);
+    }
     else if (farm['傳送門']) links.append(element('span', farm['傳送門'], 'meta'));
     if (profile && profile.href !== purchase?.href) links.append(profile);
     if (links.childNodes.length) card.append(links);
@@ -105,10 +110,33 @@ function renderFarms() {
   }));
 }
 
-$('filters').addEventListener('submit', (event) => event.preventDefault());
-$('search').addEventListener('input', renderFarms);
-$('category').addEventListener('change', renderFarms);
-$('county').addEventListener('change', renderFarms);
+function resetResults() {
+  visibleCount = pageSize;
+  renderFarms();
+}
+
+$('filters').addEventListener('submit', (event) => {
+  event.preventDefault();
+  resetResults();
+});
+$('search').addEventListener('input', resetResults);
+$('category').addEventListener('change', resetResults);
+$('clear').addEventListener('click', () => {
+  $('search').value = '';
+  $('category').value = '';
+  resetResults();
+  $('search').focus();
+});
+$('more').addEventListener('click', () => {
+  const firstNewCard = visibleCount;
+  visibleCount += pageSize;
+  renderFarms();
+  const heading = $('farms').children[firstNewCard]?.querySelector('h3');
+  if (heading) {
+    heading.tabIndex = -1;
+    heading.focus();
+  }
+});
 
 async function loadFarms() {
   try {
@@ -117,15 +145,11 @@ async function loadFarms() {
     farms = (await response.json()).map((farm) => ({
       ...farm, categories: JSON.parse(farm['販售類別'] || '[]'),
     }));
-    const options = {
-      category: farms.flatMap((farm) => farm.categories),
-      county: farms.map((farm) => farm['產地縣市']),
-    };
-    for (const [id, values] of Object.entries(options)) {
-      for (const value of [...new Set(values.filter(Boolean))].sort((a,b) => a.localeCompare(b, 'zh-TW'))) {
-        $(id).append(new Option(value, value));
-      }
+    const categories = [...new Set(farms.flatMap((farm) => farm.categories))];
+    for (const category of categories.sort((a,b) => a.localeCompare(b, 'zh-TW'))) {
+      $('category').append(new Option(category, category));
     }
+    directoryReady = true;
     renderFarms();
   } catch {
     $('count').textContent = '暫時無法讀取名錄，請稍後重新整理。';
