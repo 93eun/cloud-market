@@ -70,7 +70,29 @@ function safeLink(label, value) {
   }
 }
 
-const match = (value, query) => value.toLocaleLowerCase('zh-TW').includes(query.toLocaleLowerCase('zh-TW'));
+const aliases = [
+  [/番石榴|拔仔|芭辣/g, '芭樂'],
+  [/蕃茄|西紅柿/g, '番茄'],
+  [/番薯|甘藷|甘薯|紅薯/g, '地瓜'],
+  [/包心菜|捲心菜|^甘藍$/g, '高麗菜'],
+  [/柳橙|甜橙/g, '柳丁'],
+  [/紅龍果/g, '火龍果'],
+  [/筊白筍|茭白筍?/g, '茭白筍'],
+  [/文旦柚/g, '文旦'],
+  [/芭乐/g, '芭樂'],
+];
+
+function searchKey(value) {
+  const normalized = value.normalize('NFKC').toLocaleLowerCase('zh-TW').replace(/[\s\p{P}]+/gu, '');
+  return aliases.reduce((key, [pattern, replacement]) => key.replace(pattern, replacement), normalized);
+}
+
+function productButton(name) {
+  const button = element('button', name);
+  button.type = 'button';
+  button.dataset.product = name;
+  return button;
+}
 
 if ($('picks')) {
   for (const [name, category, , query, note] of selected) {
@@ -99,19 +121,36 @@ function showPriceCards() {
 }
 
 function renderFarms() {
-  const query = $('search').value.trim();
-  const category = $('category').value;
-  if (!directoryReady) return;
-  const results = farms.filter((farm) =>
-    (!category || farm.categories.includes(category)) &&
-    match([farm['品牌名稱'], farm['販售品項']].join(' '), query));
-  $('count').textContent = results.length ? '找到 ' + results.length + ' 筆' : '找不到符合的店家，可以換個品項或清除篩選。';
+  const query = searchKey($('search').value);
+  const category = $('category')?.value;
+  const homeResults = $('search-results');
+  if (homeResults) homeResults.hidden = !query;
+  if (!directoryReady || (homeResults && !query)) return;
+  const results = farms.flatMap((farm) => {
+    if (category && !farm.categories.includes(category)) return [];
+    const items = farm.items.filter(({key}) => query && key.includes(query) &&
+      !(query === '西瓜' && key.includes('西瓜李')));
+    const brandMatch = farm.brandKey.includes(query);
+    const categoryMatch = farm.categories.some((value) => searchKey(value) === query);
+    if (query && !items.length && !brandMatch && !categoryMatch) return [];
+    const rank = items.some(({key}) => key === query) || farm.brandKey === query ? 0 : items.length ? 1 : 2;
+    return [{farm, items, rank}];
+  });
+  if (query) results.sort((a, b) => a.rank - b.rank);
+  $('count').textContent = results.length ? '找到 ' + results.length + ' 家店家' :
+    '小農名錄目前沒有這個結果。可換個名稱、清除篩選，或展開「瀏覽全部品項」。';
   $('more').hidden = results.length <= visibleCount;
-  $('farms').replaceChildren(...results.slice(0, visibleCount).map((farm) => {
+  $('farms').replaceChildren(...results.slice(0, visibleCount).map(({farm, items}) => {
     const card = element('article', '', 'card');
     card.append(element('h3', farm['品牌名稱']));
     for (const tag of [farm['產地縣市'], ...farm.categories].filter(Boolean)) card.append(element('span', tag, 'tag'));
-    if (farm['販售品項']) card.append(element('p', farm['販售品項']));
+    if (items.length) {
+      card.append(element('p', items.map(({name}) => name).join('、'), 'matched-products'));
+    }
+    const otherItems = farm.items.filter((item) => !items.includes(item));
+    if (otherItems.length) {
+      card.append(element('p', (items.length ? '也販售 ' : '') + otherItems.map(({name}) => name).join('、')));
+    }
     if (farm['備註']) card.append(element('p', farm['備註'], 'meta'));
     if (farm['購買管道']) card.append(element('p', '購買管道：' + farm['購買管道'], 'meta'));
     const links = element('div', '', 'links');
@@ -138,12 +177,22 @@ async function loadFarms() {
     const response = await fetch('farms.json');
     if (!response.ok) throw new Error('名錄讀取失敗');
     farms = (await response.json()).map((farm) => ({
-      ...farm, categories: JSON.parse(farm['販售類別'] || '[]'),
+      ...farm,
+      categories: JSON.parse(farm['販售類別'] || '[]'),
+      brandKey: searchKey(farm['品牌名稱']),
+      items: (farm['販售品項'] || '').split(/[｜|、]/).map((name) => name.trim()).filter(Boolean)
+        .map((name) => ({name, key: searchKey(name)})),
     }));
-    const categories = [...new Set(farms.flatMap((farm) => farm.categories))];
-    for (const category of categories.sort((a,b) => a.localeCompare(b, 'zh-TW'))) {
-      $('category').append(new Option(category, category));
+    const select = $('category');
+    if (select) {
+      const categories = [...new Set(farms.flatMap((farm) => farm.categories))];
+      for (const category of categories.sort((a, b) => a.localeCompare(b, 'zh-TW'))) {
+        select.append(new Option(category, category));
+      }
     }
+    const labels = [...new Set(farms.flatMap((farm) => farm.items.map(({name}) => name)))];
+    labels.sort((a, b) => a.localeCompare(b, 'zh-TW'));
+    $('product-list').append(...labels.map(productButton));
     directoryReady = true;
     renderFarms();
   } catch {
@@ -181,19 +230,39 @@ async function loadPrices() {
 }
 
 if ($('filters')) {
-  $('search').value = new URLSearchParams(location.search).get('q') || '';
+  const search = $('search');
+  const category = $('category');
+  const resultHeading = $('results-heading') || $('count');
+  const focusResults = () => {
+    if (!searchKey(search.value)) return;
+    resultHeading.tabIndex = -1;
+    resultHeading.focus();
+  };
+  search.value = new URLSearchParams(location.search).get('q') || '';
   $('filters').addEventListener('submit', (event) => {
     event.preventDefault();
     resetResults();
+    focusResults();
   });
-  $('search').addEventListener('input', resetResults);
-  $('category').addEventListener('change', resetResults);
+  search.addEventListener('input', resetResults);
+  category?.addEventListener('change', resetResults);
   $('clear').addEventListener('click', () => {
-    $('search').value = '';
-    $('category').value = '';
+    search.value = '';
+    if (category) category.value = '';
     resetResults();
-    $('search').focus();
+    search.focus();
   });
+  function chooseProduct(event) {
+    const name = event.target.closest('button[data-product]')?.dataset.product;
+    if (!name) return;
+    search.value = name;
+    if (category) category.value = '';
+    event.currentTarget.closest('details')?.removeAttribute('open');
+    resetResults();
+    focusResults();
+  }
+  $('quick-products').addEventListener('click', chooseProduct);
+  $('product-list').addEventListener('click', chooseProduct);
   $('more').addEventListener('click', () => {
     const firstNewCard = visibleCount;
     visibleCount += pageSize;
@@ -204,6 +273,7 @@ if ($('filters')) {
       heading.focus();
     }
   });
+  resetResults();
   loadFarms();
 }
 if ($('quotes')) {
