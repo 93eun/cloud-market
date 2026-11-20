@@ -171,6 +171,30 @@ function showPriceCards() {
   }
 }
 
+function browseLabels(items) {
+  const labels = new Map();
+  for (const {name, key} of items) {
+    const group = browseGroups.get(key) || key;
+    if (!labels.has(group)) labels.set(group, name);
+    if (group !== key || labels.get(group) !== name) labels.set(group, group);
+  }
+  return [...labels.values()].sort((a, b) => a.localeCompare(b, 'zh-TW'));
+}
+
+function renderSuggestions(query, category) {
+  const suggestions = $('product-suggestions');
+  if (!suggestions) return;
+  const products = browseLabels(farms
+    .filter((farm) => !category || farm.categories.includes(category))
+    .flatMap((farm) => query ? itemsForQuery(farm, query) : farm.items));
+  const common = ['高麗菜', '小黃瓜', '地瓜', '芭樂', '柳丁', '草莓'];
+  const matches = query ? products.filter((name) => searchKey(name) !== query) : common.filter((name) => products.includes(name));
+  const shown = (query || !category ? matches : [...new Set([...matches, ...products])]).slice(0, 6);
+  $('suggestion-label').textContent = query ? '相符品項' : category ? '此類別的品項' : '常見品項';
+  $('suggestion-list').replaceChildren(...shown.map(productButton));
+  suggestions.hidden = shown.length === 0;
+}
+
 function renderFarms() {
   const query = searchKey($('search').value);
   const category = $('category')?.value;
@@ -180,6 +204,7 @@ function renderFarms() {
     $('shop-ideas').hidden = Boolean(query);
   }
   if (!directoryReady || (homeResults && !query)) return;
+  renderSuggestions(query, category);
   const results = farms.flatMap((farm) => {
     if (category && !farm.categories.includes(category)) return [];
     const items = itemsForQuery(farm, query);
@@ -196,12 +221,25 @@ function renderFarms() {
   $('more').hidden = results.length <= visibleCount;
   $('farms').replaceChildren(...results.slice(0, visibleCount).map(({farm, items}) => {
     const card = element('article', '', 'card farm-card');
-    card.append(element('h3', farm['品牌名稱']));
-    const tags = element('div', '');
-    for (const tag of [farm['產地縣市'], ...farm.categories].filter(Boolean)) {
-      tags.append(element('span', tag, 'tag'));
+    const title = element('div', '', 'farm-title');
+    const profileText = element('div', '');
+    const brand = farm['品牌名稱'];
+    const initial = brand.match(/[\p{L}\p{N}]/u)?.[0]?.toLocaleUpperCase('zh-TW') || '農';
+    const icon = element('span', initial, 'farm-icon');
+    icon.setAttribute('aria-hidden', 'true');
+    const tone = (brand.codePointAt(0) || 0) % 3;
+    icon.classList.add('farm-icon-tone-' + tone);
+    profileText.append(
+      element('h3', brand),
+      element('p', '產地 ' + (farm['產地縣市'] || '未提供'), 'farm-origin')
+    );
+    title.append(icon, profileText);
+    card.append(title);
+    if (farm.categories.length) {
+      const categories = element('div', '', 'farm-categories');
+      for (const category of farm.categories) categories.append(element('span', category, 'tag'));
+      card.append(categories);
     }
-    if (tags.childNodes.length) card.append(tags);
     if (items.length) {
       card.append(element('p', items.map(({name}) => name).join('、'), 'matched-products'));
     }
@@ -259,13 +297,8 @@ async function loadFarms() {
     }
     const list = $('product-list');
     if (list) {
-      const labels = new Map();
-      for (const {name, key} of farms.flatMap((farm) => farm.items)) {
-        const group = browseGroups.get(key) || key;
-        if (!labels.has(group)) labels.set(group, name);
-        if (group !== key || labels.get(group) !== name) labels.set(group, group);
-      }
-      list.append(...[...labels.values()].sort((a, b) => a.localeCompare(b, 'zh-TW')).map(productButton));
+      const labels = browseLabels(farms.flatMap((farm) => farm.items));
+      list.append(...labels.map(productButton));
     }
     directoryReady = true;
     if ($('filters')) renderFarms();
@@ -332,12 +365,13 @@ if ($('filters')) {
     const name = event.target.closest('button[data-product]')?.dataset.product;
     if (!name) return;
     search.value = name;
-    if (category) category.value = '';
+    if (category && event.currentTarget === $('product-list')) category.value = '';
     event.currentTarget.closest('details')?.removeAttribute('open');
     resetResults();
     focusResults();
   }
   $('product-list')?.addEventListener('click', chooseProduct);
+  $('suggestion-list')?.addEventListener('click', chooseProduct);
   $('more').addEventListener('click', () => {
     const firstNewCard = visibleCount;
     visibleCount += pageSize;

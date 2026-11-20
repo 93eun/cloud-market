@@ -6,8 +6,8 @@
 <meta name="description" content="台灣小農購買指南，依節氣找當季蔬果、參考批發行情，直接前往小農的購買管道。">
 <meta name="theme-color" content="#f8f5ed">
 <title>小農名錄｜雲端菜市場</title>
-<link rel="stylesheet" href="market.css?v=8">
-<script defer src="market.js?v=8"></script>
+<link rel="stylesheet" href="market.css?v=10">
+<script defer src="market.js?v=10"></script>
 </head>
 <body>
 <aside class="safety-banner" aria-label="防詐提醒">
@@ -16,18 +16,21 @@
 <header><nav aria-label="市場導覽"><a class="brand" href="index.html">雲端菜市場</a><div class="nav-links"><a href="index.html">首頁</a><a href="farms.html" aria-current="page">找小農</a><a href="season.html">當季與週報</a><a href="prices.html">批發行情</a></div></nav><div class="intro"><h1>小農名錄</h1><p>依品項找小農，進店家頁面確認供貨和配送，再向店家下單。</p></div></header>
 <main>
 <section id="directory">
-  
   <form class="filters" id="filters" role="search" aria-label="搜尋小農">
     <div><label for="search">輸入品項或店家名稱</label><div class="search-row"><input id="search" type="search" placeholder="例如：高麗菜、芭樂"><button id="clear" type="button">清除</button></div></div>
     <div><label for="category">販售類別</label><select id="category"><option value="">全部類別</option></select></div>
   </form>
+  <div class="product-suggestions" id="product-suggestions" hidden>
+    <p id="suggestion-label">常見品項</p>
+    <div class="quick-products" id="suggestion-list" aria-labelledby="suggestion-label"></div>
+  </div>
   <details class="product-index">
-    <summary>不知道品項名稱？瀏覽品項</summary>
+    <summary>瀏覽全部品項</summary>
     <div class="quick-products" id="product-list"></div>
   </details>
   <p id="count" role="status">正在載入小農名錄。</p>
   <p id="no-results" hidden><a href="season.html">看當季推薦</a></p>
-  <div class="grid" id="farms"></div>
+  <div class="grid farm-grid" id="farms"></div>
   <button id="more" type="button" hidden>顯示更多店家</button>
   <p class="meta">販售品項以店家公告為準。</p>
 </section>
@@ -35,8 +38,12 @@
 <footer>
   <section class="disclaimer" id="disclaimer" aria-labelledby="disclaimer-title">
     <h2 id="disclaimer-title">關於本站與免責聲明</h2>
-    <p>雲端菜市場由 <a href="https://www.threads.com/@_93.eun">Threads @_93.eun</a> 個人整理，僅供個人選購參考。本站不接受訂單、不代收款項，也不要求填寫姓名、電話、地址或付款資料。</p>
-    <p>下單前請自行向店家確認商品、價格、付款、配送與退換貨條件。買賣由買家與店家自行成立，整理者不參與交易。在法律允許範圍內，整理者不對因使用本站資訊或與第三方交易所生的損失負賠償責任。依法不得免除的責任仍依法律規定。</p>
+    <p>雲端菜市場由 <a href="https://www.threads.com/@_93.eun">Threads @_93.eun</a> 個人整理，僅供個人選購參考。<br>
+      本站不接受訂單、不代收款項，也不要求填寫姓名、電話、地址或付款資料。</p>
+    <p>下單前請自行向店家確認商品、價格、付款、配送與退換貨條件。<br>
+      買賣由買家與店家自行成立，整理者不參與交易。<br>
+      在法律允許範圍內，整理者不對因使用本站資訊或與第三方交易所生的損失負賠償責任。<br>
+      依法不得免除的責任仍依法律規定。</p>
   </section>
   <p class="site-dates"><span>網站最近發布 <time id="published-at">查詢中</time></span><span>小農名錄整理至 <time datetime="2026-10-05">2026/10/05</time></span></p>
 </footer>
