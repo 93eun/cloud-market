@@ -186,3 +186,12 @@ footer { border-top: 1px solid var(--line); padding: .85rem 0; color: var(--mute
 }
 .channel-links a { min-height: 44px; font-size: .875rem; }
 .farm-card .links a { font-size: .875rem; }
+
+.page-back { display: flex; flex-wrap: wrap; gap: .45rem; margin: 1.25rem 0; }
+.back-link {
+  display: inline-flex; align-items: center; min-height: 44px; padding: .3rem .7rem;
+  border: 1px solid var(--line); border-radius: .5rem; background: var(--green-wash);
+  color: var(--green-dark); font-size: .94rem; font-weight: 700; text-decoration: none;
+}
+.back-link:hover { background: var(--warm); text-decoration: underline; }
+#directory, #filters, #season-search, #price-search { scroll-margin-top: .8rem; }

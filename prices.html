@@ -6,14 +6,14 @@
 <meta name="description" content="台灣小農購買指南，依節氣找當季蔬果、參考批發行情，直接前往小農的購買管道。">
 <meta name="theme-color" content="#f8f5ed">
 <title>蔬果行情｜雲端菜市場</title>
-<link rel="stylesheet" href="market.css?v=12">
-<script defer src="market.js?v=12"></script>
+<link rel="stylesheet" href="market.css?v=14">
+<script defer src="market.js?v=14"></script>
 </head>
 <body>
 <aside class="safety-banner" aria-label="防詐提醒">
   <p><strong>防詐提醒</strong>　下單前先確認店家身分和網址。請勿提供驗證碼，也不要依指示操作 ATM 或匯款給不明帳戶。遇到可疑情況，請撥 <a href="tel:165">165 反詐騙專線</a>。<a class="disclaimer-link" href="#disclaimer">免責聲明</a></p>
 </aside>
-<header><nav aria-label="市場導覽"><a class="brand" href="index.html">雲端菜市場</a><div class="nav-links"><a href="index.html">首頁</a><a href="farms.html">找小農</a><a href="season.html">當季與週報</a><a href="prices.html" aria-current="page">批發行情</a></div></nav><div class="intro"><h1>蔬果行情</h1><p>查看農業部公布的批發行情。</p><form class="site-search" action="farms.html" method="get" role="search"><input type="search" name="q" aria-label="搜尋蔬果或店家" placeholder="搜尋蔬果或店家"><button type="submit">搜尋</button></form></div></header>
+<header><nav aria-label="市場導覽"><a class="brand" href="index.html">雲端菜市場</a><div class="nav-links"><a href="index.html">首頁</a><a href="farms.html?from=price-search">找小農</a><a href="season.html?from=price-search">當季與週報</a><a href="prices.html" aria-current="page">批發行情</a></div></nav><div class="intro"><h1>蔬果行情</h1><p>查看農業部公布的批發行情。</p><form class="site-search" id="price-search" action="farms.html" method="get" role="search" tabindex="-1"><input type="hidden" name="from" value="price-search"><input type="search" name="q" aria-label="搜尋蔬果或店家" placeholder="搜尋蔬果或店家"><button type="submit">搜尋</button></form></div></header>
 <main>
 <section id="prices">
   <p class="section-note muted">台北二市場交易均價，單位為新臺幣／公斤。價格以各筆交易日期為準。</p>
@@ -21,6 +21,9 @@
   <div id="quotes" class="grid"></div>
   <p><a href="https://data.moa.gov.tw/open_search.aspx?id=037">查看農業部完整行情</a></p>
 </section>
+<div class="page-back" role="navigation" aria-label="返回選項">
+  <a class="back-link" id="source-return" href="index.html#prices">回到首頁分類</a>
+</div>
 </main>
 <footer>
   <section class="disclaimer" id="disclaimer" aria-labelledby="disclaimer-title">

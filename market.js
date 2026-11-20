@@ -144,7 +144,7 @@ function showSeasonalPicks() {
     if (home) {
       if (!shopCount) continue;
       const link = element('a', '');
-      link.href = 'farms.html?q=' + encodeURIComponent(query);
+      link.href = 'farms.html?q=' + encodeURIComponent(query) + '&from=home-picks';
       link.append(element('strong', name), element('span', shopCount + ' 家', 'meta'));
       home.append(link);
       continue;
@@ -153,7 +153,7 @@ function showSeasonalPicks() {
     card.append(element('h4', name), element('p', note));
     if (shopCount) {
       const link = element('a', '找' + name + '店家', 'pick-link');
-      link.href = 'farms.html?q=' + encodeURIComponent(query);
+      link.href = 'farms.html?q=' + encodeURIComponent(query) + '&from=season';
       card.append(link);
     } else {
       card.append(element('p', '名錄暫無販售店家', 'meta'));
@@ -430,6 +430,24 @@ if ($('filters') || $('picks')) loadFarms();
 if ($('quotes')) {
   showPriceCards();
   loadPrices();
+}
+
+const sourceReturn = $('source-return');
+if (sourceReturn) {
+  const origins = new Map([
+    ['home-picks', ['index.html#shop-ideas', '回到首頁食材推薦']],
+    ['vegetable-weekly', ['season.html#vegetable-weekly', '回到蔬菜週報']],
+    ['fruit-weekly', ['season.html#weekly', '回到水果週報']],
+    ['season', ['season.html#season', '回到當季推薦']],
+    ['season-search', ['season.html#season-search', '回到當季頁搜尋']],
+    ['price-search', ['prices.html#price-search', '回到批發行情搜尋']],
+    ['directory', ['farms.html#filters', '回到名錄分類']],
+  ]);
+  const previous = origins.get(new URLSearchParams(location.search).get('from'));
+  if (previous) {
+    sourceReturn.href = previous[0];
+    sourceReturn.textContent = previous[1];
+  }
 }
 
 async function loadPublishDate() {

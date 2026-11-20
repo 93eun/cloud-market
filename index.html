@@ -6,8 +6,8 @@
 <meta name="description" content="台灣小農購買指南，依節氣找當季蔬果、參考批發行情，直接前往小農的購買管道。">
 <meta name="theme-color" content="#f8f5ed">
 <title>雲端菜市場</title>
-<link rel="stylesheet" href="market.css?v=12">
-<script defer src="market.js?v=12"></script>
+<link rel="stylesheet" href="market.css?v=14">
+<script defer src="market.js?v=14"></script>
 </head>
 <body>
 <aside class="safety-banner" aria-label="防詐提醒">
@@ -24,10 +24,10 @@
         <input id="search" type="search" name="q" placeholder="試試高麗菜、柳丁，或店家名稱">
         <button type="submit" class="primary">找店家</button>
       </form>
-      <div class="browse-links" aria-label="依類別逛小農">
+      <div class="browse-links" id="directory" tabindex="-1" aria-label="依類別逛小農">
         <a href="farms.html?category=蔬菜">逛蔬菜</a>
         <a href="farms.html?category=水果">逛水果</a>
-        <a id="directory" href="farms.html">看全部小農</a>
+        <a href="farms.html">看全部小農</a>
       </div>
     </div>
     <img class="hero-image" src="market-basket.webp" width="960" height="640" alt="竹籃裡盛著高麗菜、柑橘、小番茄和地瓜">
