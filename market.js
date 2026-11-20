@@ -62,17 +62,25 @@ const browseGroups = new Map([
   ['溫室葡萄', '葡萄'],
   ['麻豆文旦', '文旦'],
 ]);
-const channelLabels = new Map([
-  ['官方line', '前往 LINE 詢購'],
-  ['私訊訂購', '私訊店家'],
-  ['官方網站', '前往店家網站'],
-  ['FB社團', '前往 Facebook 社團'],
-  ['賣貨便', '到賣貨便選購'],
-  ['google表單', '開啟訂購表單'],
-  ['全家', '前往全家賣場'],
-  ['蝦皮', '前往蝦皮賣場'],
-  ['momo', '前往 momo 賣場'],
+const categoryColors = new Map([
+  ['水果', 'orange'], ['蔬菜', 'green'], ['海鮮', 'red'], ['肉品', 'rose'],
+  ['食用花卉/天然調味', 'pink'], ['懶人料理包', 'blue'], ['蛋奶類', 'neutral'],
+  ['米麵雜糧', 'gray'], ['天然清潔用品', 'brown'], ['官方平台', 'yellow'],
 ]);
+const channels = new Map([
+  ['官方line', {name: 'LINE 訂購', action: '前往 LINE 詢購', color: 'neutral'}],
+  ['私訊訂購', {name: '私訊訂購', action: '私訊店家', color: 'orange'}],
+  ['官方網站', {name: '官方網站', action: '前往店家網站', color: 'red'}],
+  ['FB社團', {name: 'Facebook 社團', action: '前往 Facebook 社團', color: 'green'}],
+  ['賣貨便', {name: '賣貨便', action: '到賣貨便選購', color: 'brown'}],
+  ['google表單', {name: 'Google 表單', action: '開啟訂購表單', color: 'yellow'}],
+  ['全家', {name: '全家賣場', action: '前往全家賣場', color: 'pink'}],
+  ['蝦皮', {name: '蝦皮賣場', action: '前往蝦皮賣場', color: 'gray'}],
+  ['momo', {name: 'momo 賣場', action: '前往 momo 賣場', color: 'blue'}],
+]);
+const threadsChannel = {name: 'Threads 聯絡', color: 'gray'};
+const otherChannel = {name: '其他購買方式', color: 'neutral'};
+const byStroke = new Intl.Collator('zh-Hant-TW', {collation: 'stroke'});
 let visibleCount = pageSize;
 let farms = [];
 let directoryReady = false;
@@ -198,7 +206,9 @@ function renderSuggestions(query, category) {
 
 function renderFarms() {
   const query = searchKey($('search').value);
-  const category = $('category')?.value;
+  const select = $('category');
+  const category = select?.value;
+  if (select) select.className = category ? 'tone-' + (categoryColors.get(category) || 'neutral') : '';
   const homeResults = $('search-results');
   if (homeResults) {
     homeResults.hidden = !query;
@@ -219,49 +229,81 @@ function renderFarms() {
   $('count').textContent = results.length ? '找到 ' + results.length + ' 家店家' :
     '名錄目前沒有符合的店家。可換個名稱，或清除篩選重找。';
   $('no-results').hidden = Boolean(results.length);
-  $('more').hidden = results.length <= visibleCount;
-  $('farms').replaceChildren(...results.slice(0, visibleCount).map(({farm, items}) => {
-    const card = element('article', '', 'card farm-card');
-    const title = element('div', '', 'farm-title');
-    const profileText = element('div', '');
-    const brand = farm['品牌名稱'];
-    const icon = element('span', '', 'farm-icon');
-    icon.setAttribute('aria-hidden', 'true');
-    const tone = (brand.codePointAt(0) || 0) % 3;
-    icon.classList.add('farm-icon-tone-' + tone);
-    profileText.append(
-      element('h3', brand),
-      element('p', '產地 ' + (farm['產地縣市'] || '未提供'), 'farm-origin')
-    );
-    title.append(icon, profileText);
-    card.append(title);
-    if (farm.categories.length) {
-      const categories = element('div', '', 'farm-categories');
-      for (const category of farm.categories) categories.append(element('span', category, 'tag'));
-      card.append(categories);
+  const listing = $('farms');
+  const channelLinks = $('channel-links');
+  const grouped = Boolean(category && channelLinks);
+  $('more').hidden = grouped || results.length <= visibleCount;
+  if (channelLinks) {
+    channelLinks.hidden = !grouped || !results.length;
+    channelLinks.replaceChildren();
+  }
+  if (!grouped) {
+    listing.replaceChildren(...results.slice(0, visibleCount).map(farmCard));
+    return;
+  }
+
+  const groups = new Map();
+  for (const result of results) {
+    const farm = result.farm;
+    const channel = farm['傳送門'] ? channels.get(farm['購買管道']) || otherChannel :
+      farm['@帳號'] ? threadsChannel : otherChannel;
+    if (!groups.has(channel)) groups.set(channel, []);
+    groups.get(channel).push(result);
+  }
+  const sections = [];
+  const sortedGroups = [...groups].sort(([a], [b]) => byStroke.compare(a.name, b.name));
+  for (const [channel, entries] of sortedGroups) {
+    entries.sort((a, b) => byStroke.compare(a.farm['品牌名稱'], b.farm['品牌名稱']));
+    const id = 'purchase-group-' + (sections.length + 1);
+    const jump = element('a', channel.name, 'channel-label tone-' + channel.color);
+    jump.href = '#' + id;
+    channelLinks.append(jump);
+    const section = element('section', '', 'purchase-group');
+    section.setAttribute('aria-labelledby', id);
+    const heading = element('h2', channel.name, 'channel-label tone-' + channel.color);
+    heading.id = id;
+    const cards = element('div', '', 'grid farm-grid');
+    cards.append(...entries.map(farmCard));
+    section.append(heading, cards);
+    sections.push(section);
+  }
+  listing.replaceChildren(...sections);
+}
+
+function farmCard({farm, items}) {
+  const card = element('article', '', 'card farm-card');
+  card.append(
+    element('h3', farm['品牌名稱']),
+    element('p', '產地 ' + (farm['產地縣市'] || '未提供'), 'farm-origin')
+  );
+  if (farm.categories.length) {
+    const categories = element('div', '', 'farm-categories');
+    for (const category of farm.categories) {
+      categories.append(element('span', category, 'tag tone-' + (categoryColors.get(category) || 'neutral')));
     }
-    if (items.length) {
-      card.append(element('p', items.map(({name}) => name).join('、'), 'matched-products'));
-    }
-    const otherItems = farm.items.filter((item) => !items.includes(item));
-    if (otherItems.length) {
-      card.append(element('p', (items.length ? '也販售 ' : '') + otherItems.map(({name}) => name).join('、')));
-    }
-    if (farm['備註']) card.append(element('p', farm['備註'], 'meta'));
-    const links = element('div', '', 'links');
-    const purchase = safeLink(channelLabels.get(farm['購買管道']) || '前往購買管道', farm['傳送門']);
-    const profile = safeLink(purchase ? 'Threads 帳號' : '前往店家 Threads', farm['@帳號']);
-    if (purchase) {
-      purchase.className = 'purchase';
-      links.append(purchase);
-    }
-    if (profile && profile.href !== purchase?.href) {
-      if (!purchase) profile.className = 'purchase';
-      links.append(profile);
-    }
-    if (links.childNodes.length) card.append(links);
-    return card;
-  }));
+    card.append(categories);
+  }
+  if (items.length) {
+    card.append(element('p', items.map(({name}) => name).join('、'), 'matched-products'));
+  }
+  const otherItems = farm.items.filter((item) => !items.includes(item));
+  if (otherItems.length) {
+    card.append(element('p', (items.length ? '也販售 ' : '') + otherItems.map(({name}) => name).join('、')));
+  }
+  if (farm['備註']) card.append(element('p', farm['備註'], 'meta'));
+  const links = element('div', '', 'links');
+  const purchase = safeLink(channels.get(farm['購買管道'])?.action || '前往購買管道', farm['傳送門']);
+  const profile = safeLink(purchase ? 'Threads 帳號' : '前往店家 Threads', farm['@帳號']);
+  if (purchase) {
+    purchase.className = 'purchase';
+    links.append(purchase);
+  }
+  if (profile && profile.href !== purchase?.href) {
+    if (!purchase) profile.className = 'purchase';
+    links.append(profile);
+  }
+  if (links.childNodes.length) card.append(links);
+  return card;
 }
 
 function resetResults() {

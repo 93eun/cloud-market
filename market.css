@@ -143,34 +143,13 @@ footer { border-top: 1px solid var(--line); padding: .85rem 0; color: var(--mute
 @media (max-width: 410px) { .weekly-rows > div { grid-template-columns: 4.45rem minmax(0, 1fr); } }
 
 .farm-grid > .farm-card { padding: .85rem; }
-.farm-title { display: flex; gap: .65rem; align-items: center; width: 100%; }
-.farm-title > div { min-width: 0; }
 .farm-origin { margin-top: .2rem; color: var(--muted); font-size: .875rem; }
 .farm-categories { margin-top: .3rem; }
-.farm-icon {
-  flex: 0 0 2.75rem; height: 2.75rem; position: relative;
-  overflow: hidden; border: 1px solid #cfc3b0; border-radius: .68rem;
-  color: var(--green-dark); background: #ebeee3;
-}
-.farm-icon::before {
-  content: ""; position: absolute; inset: 0 0 auto; height: .46rem;
-  background: repeating-linear-gradient(90deg, #7a8c6f 0 .33rem, #d5ddc9 .33rem .66rem);
-}
-.farm-icon-tone-1 { background: #f5e7d8; color: #694b38; }
-.farm-icon-tone-1::before { background: repeating-linear-gradient(90deg, #b88b71 0 .33rem, #e8cdb8 .33rem .66rem); }
-.farm-icon-tone-2 { background: #f2ead6; color: #695633; }
-.farm-icon-tone-2::before { background: repeating-linear-gradient(90deg, #a8986c 0 .33rem, #e6d9b8 .33rem .66rem); }
 .product-suggestions { border: 1px solid var(--line); border-radius: var(--radius); padding: .6rem .8rem; background: var(--surface); }
 .product-suggestions p { margin: 0 0 .25rem; color: var(--muted); font-weight: 650; }
 .product-suggestions button { background: var(--green-wash); }
 .product-suggestions button:hover { background: var(--warm); }
 
-.farm-icon::after {
-  content: ""; position: absolute; inset: .85rem .64rem .52rem;
-  border: 1.5px solid currentColor; border-radius: .15rem .15rem .08rem .08rem;
-  background: linear-gradient(currentColor, currentColor) center bottom / 1.5px 64% no-repeat;
-  opacity: .72;
-}
 .seasonal-picks { display: grid; gap: .65rem; margin-top: .7rem; }
 .seasonal-row { display: grid; grid-template-columns: 3.4rem minmax(0, 1fr); gap: .6rem; align-items: start; }
 .seasonal-label { margin: 0; padding: .38rem .32rem; border-radius: .4rem; text-align: center; font-size: .96rem; }
@@ -185,3 +164,24 @@ footer { border-top: 1px solid var(--line); padding: .85rem 0; color: var(--mute
   .seasonal-items { gap: .35rem; }
   .seasonal-items > li { padding: .5rem .46rem; }
 }
+
+.tone-orange { background: #fae3cd; color: #684121; }
+.tone-green { background: #dfebd9; color: #314b31; }
+.tone-red { background: #f6dedc; color: #762d30; }
+.tone-rose { background: #f6d9ce; color: #752f26; }
+.tone-pink { background: #f4e0eb; color: #6e3b59; }
+.tone-blue { background: #deebf5; color: #2f516c; }
+.tone-neutral { background: #f2eee7; color: #514a3e; }
+.tone-gray { background: #e6e7e6; color: #414742; }
+.tone-brown { background: #eddfd3; color: #62432f; }
+.tone-yellow { background: #faedc4; color: #624b19; }
+.purchase-group { width: 100%; margin: .35rem 0 .9rem; }
+.purchase-group .grid { margin-top: .5rem; }
+.purchase-group h2 { scroll-margin-top: 1rem; }
+.channel-links { display: flex; flex-wrap: wrap; gap: .35rem; margin: .55rem 0 .8rem; }
+.channel-label {
+  display: inline-flex; align-items: center; padding: .25rem .65rem;
+  border-radius: .4rem; font-size: 1rem; font-weight: 720;
+}
+.channel-links a { min-height: 44px; font-size: .875rem; }
+.farm-card .links a { font-size: .875rem; }
