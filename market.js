@@ -43,6 +43,9 @@ const weeklyIsCurrent = taipeiDay >= '2026-11-19' && taipeiDay <= '2026-11-22';
 if ($('weekly-status') && !weeklyIsCurrent) {
   $('weekly-status').textContent = '歷史週報｜2026 年 11 月 19 日至 22 日。近期價格請查看蔬果批發行情。';
 }
+if ($('vegetable-weekly-status') && taipeiDay > '2026-11-22') {
+  $('vegetable-weekly-status').textContent = '歷史週報｜2026 年 11 月 16 日至 22 日。近期價格請查看蔬果批發行情。';
+}
 const selected = monthly[month - 1].map((key) => produce[key]);
 const priceElements = new Map();
 const number = new Intl.NumberFormat('zh-TW', {maximumFractionDigits:1});
@@ -150,9 +153,7 @@ function showSeasonalPicks() {
   }
 }
 
-if ($('home-weekly') && !weeklyIsCurrent) {
-  $('home-weekly').textContent = '水果週報存檔 11/19–11/22 · Threads @abc89151207';
-}
+if ($('home-weekly')) $('home-weekly').hidden = taipeiDay <= '2026-11-22';
 
 function showPriceCards() {
   const priceItems = new Map(selected.map(([name, , code]) => [code, name]));

@@ -120,3 +120,6 @@ footer { border-top: 1px solid var(--line); padding: .85rem 0; color: var(--mute
 .disclaimer { max-width: 52rem; margin: 0 0 .9rem; }
 .disclaimer h2 { font-size: 1rem; }
 .site-dates { display: flex; flex-wrap: wrap; column-gap: 1.2rem; row-gap: .2rem; border-top: 1px solid var(--line); padding-top: .6rem; }
+
+.weekly-links { display: flex; align-items: center; flex-wrap: wrap; gap: .1rem .8rem; margin-top: .25rem; }
+.weekly-links a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 650; }

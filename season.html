@@ -6,14 +6,15 @@
 <meta name="description" content="台灣小農購買指南，依節氣找當季蔬果、參考批發行情，直接前往小農的購買管道。">
 <meta name="theme-color" content="#f8f5ed">
 <title>當季推薦｜雲端菜市場</title>
-<link rel="stylesheet" href="market.css?v=7">
-<script defer src="market.js?v=7"></script>
+<link rel="stylesheet" href="market.css?v=8">
+<script defer src="market.js?v=8"></script>
 </head>
 <body>
 <aside class="safety-banner" aria-label="防詐提醒">
   <p><strong>防詐提醒</strong>　下單前先確認店家身分和網址。請勿提供驗證碼，也不要依指示操作 ATM 或匯款給不明帳戶。遇到可疑情況，請撥 <a href="tel:165">165 反詐騙專線</a>。<a class="disclaimer-link" href="#disclaimer">免責聲明</a></p>
 </aside>
-<header><nav aria-label="市場導覽"><a class="brand" href="index.html">雲端菜市場</a><div class="nav-links"><a href="index.html">首頁</a><a href="farms.html">找小農</a><a href="season.html" aria-current="page">當季與週報</a><a href="prices.html">批發行情</a></div></nav><div class="intro"><h1>當季推薦</h1><p>看節氣、當季蔬果與每期週報。</p><form class="site-search" action="farms.html" method="get" role="search"><input type="search" name="q" aria-label="搜尋蔬果或店家" placeholder="搜尋蔬果或店家"><button type="submit">搜尋</button></form></div></header>
+<header><nav aria-label="市場導覽"><a class="brand" href="index.html">雲端菜市場</a><div class="nav-links"><a href="index.html">首頁</a><a href="farms.html">找小農</a><a href="season.html" aria-current="page">當季與週報</a><a href="prices.html">批發行情</a></div></nav><div class="intro"><h1>當季推薦</h1><p>看節氣、當季蔬果與每期週報。</p>
+<div class="weekly-links" aria-label="跳到週報"><a href="#vegetable-weekly">蔬菜週報</a><a href="#weekly">水果週報</a></div><form class="site-search" action="farms.html" method="get" role="search"><input type="search" name="q" aria-label="搜尋蔬果或店家" placeholder="搜尋蔬果或店家"><button type="submit">搜尋</button></form></div></header>
 <main>
 <section id="season">
   <p class="term">目前節氣 <strong id="term">—</strong></p>
@@ -21,8 +22,34 @@
   <p class="section-note muted">依台灣常見產季整理。採收與供貨情形請向店家確認。</p>
   <div class="grid" id="picks"></div>
 </section>
-<section class="weekly" id="weekly">
-    <h2>水果週報｜11/19–11/22</h2>
+<section class="weekly" id="vegetable-weekly" aria-labelledby="vegetable-weekly-title">
+  <h2 id="vegetable-weekly-title">蔬菜週報｜11/16–11/22</h2>
+  <p class="section-note muted" id="vegetable-weekly-status">2026 年 11 月 16 日至 22 日的市場預測，依地區和品種而異。</p>
+  <div class="grid">
+    <article class="card pick">
+      <h3>買菜可以先看</h3>
+      <p>中南部的櫛瓜、秋葵和芋頭，以及台中與三重的白花椰菜，都列為低價。大黃瓜、冬瓜也有低價觀察。</p>
+      <div class="weekly-links"><a href="farms.html?q=櫛瓜">找櫛瓜店家</a><a href="farms.html?q=秋葵">找秋葵店家</a></div>
+    </article>
+    <article class="card pick">
+      <h3>想買價格較穩的菜</h3>
+      <p>小黃瓜、青花菜、地瓜葉、芹菜、水蓮和白蘿蔔。帶殼玉米筍與茭白筍在中南部也列為持平。</p>
+      <div class="weekly-links"><a href="farms.html?q=小黃瓜">找小黃瓜店家</a><a href="farms.html?q=茭白筍">找茭白筍店家</a></div>
+    </article>
+    <article class="card pick">
+      <h3>可以先比價再買</h3>
+      <p>小白菜、青江菜、芥蘭菜、油菜和小松菜偏貴。初秋高麗菜在北部與高雄偏貴，其他中南部市場列為微漲。絲瓜、茄子也偏貴。</p>
+    </article>
+  </div>
+  <details>
+    <summary>看市場差異與作物觀察</summary>
+    <p>牛番茄在北部偏貴，中南部微漲。北部櫛瓜和秋葵價格持平，中南部則列為低價。初秋高麗菜供應增加、價格較前期下跌，但本期在部分市場仍偏貴。</p>
+    <p>週報指出，絲瓜、苦瓜和茄子進入淡產期，本土甜碗豆與青花筍供應也少。本期評估範圍排除雜糧豆類、菇類與豆芽菜。</p>
+  </details>
+  <p class="meta">來源：<a href="https://www.threads.com/@abc89151207">Threads @abc89151207</a>〈每週評青菜市場〉。市場行情供選購參考，店家供貨與售價以各自公告為準。</p>
+</section>
+<section class="weekly" id="weekly" aria-labelledby="fruit-weekly-title">
+    <h2 id="fruit-weekly-title">水果週報｜11/19–11/22</h2>
     <p class="section-note muted" id="weekly-status">2026 年 11 月 19 日至 22 日的市場預測，各地行情可能不同。</p>
     <div class="grid">
       <article class="card pick"><h3>可以先買</h3><p>網紋紅肉或綠肉洋香瓜、紅肉葡萄柚、小玉西瓜。</p><p class="meta">週報也點名新疆洋香瓜和光面綠肉洋香瓜。三重的光面綠肉行情微漲。</p></article>
