@@ -142,6 +142,7 @@ footer { border-top: 1px solid var(--line); padding: .85rem 0; color: var(--mute
 @media (max-width: 850px) { .weekly-grid { grid-template-columns: 1fr; } }
 @media (max-width: 410px) { .weekly-rows > div { grid-template-columns: 4.45rem minmax(0, 1fr); } }
 
+#directory .farm-grid { justify-content: flex-start; }
 .farm-grid > .farm-card { padding: .85rem; }
 .farm-origin { margin-top: .2rem; color: var(--muted); font-size: .875rem; }
 .farm-categories { margin-top: .3rem; }
