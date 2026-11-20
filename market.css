@@ -195,3 +195,7 @@ footer { border-top: 1px solid var(--line); padding: .85rem 0; color: var(--mute
 }
 .back-link:hover { background: var(--warm); text-decoration: underline; }
 #directory, #filters, #season-search, #price-search { scroll-margin-top: .8rem; }
+
+.price-section { margin: 1.2rem 0 1.55rem; }
+.price-quotes { margin-top: .35rem; }
+.quote-detail { display: block; margin: .05rem 0 0; }

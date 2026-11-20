@@ -1,0 +1,46 @@
+{
+  "vegetables": {
+    "start": "2026-11-16",
+    "end": "2026-11-22",
+    "source": {"title": "每週評青菜市場", "account": "@abc89151207", "url": "https://www.threads.com/@abc89151207"},
+    "groups": {
+      "priority": {
+        "note": "中南部較便宜",
+        "items": [
+          {"name": "櫛瓜", "farmQuery": "櫛瓜", "quoteNames": ["櫛瓜", "節瓜", "西葫蘆"]},
+          {"name": "秋葵", "farmQuery": "秋葵", "quoteCodes": ["FA1"]}
+        ]
+      },
+      "steady": {
+        "items": [
+          {"name": "小黃瓜", "farmQuery": "小黃瓜", "quoteCodes": ["FD1"]},
+          {"name": "青花菜", "quoteCodes": ["FR1"]},
+          {"name": "地瓜葉", "quoteCodes": ["LO1"]}
+        ]
+      },
+      "compare": {"items": [{"name": "小白菜"}, {"name": "青江菜"}, {"name": "初秋高麗菜", "note": "北部與高雄"}]}
+    }
+  },
+  "fruits": {
+    "start": "2026-11-19",
+    "end": "2026-11-22",
+    "source": {"title": "每週評水果市場", "account": "@abc89151207", "url": "https://www.threads.com/@abc89151207"},
+    "groups": {
+      "priority": {
+        "items": [
+          {"name": "網紋洋香瓜", "quoteCodes": ["W1", "W2"]},
+          {"name": "小玉西瓜", "quoteNames": ["小玉西瓜", "西瓜-小玉"]},
+          {"name": "紅肉葡萄柚", "quoteCodes": ["H4"]}
+        ]
+      },
+      "steady": {
+        "items": [
+          {"name": "柳橙", "farmQuery": "柳橙", "quoteCodes": ["E1"]},
+          {"name": "百香果", "farmQuery": "百香果", "quoteCodes": ["51", "50"]},
+          {"name": "甜柿", "quoteCodes": ["Z4"]}
+        ]
+      },
+      "compare": {"items": [{"name": "玉女小番茄"}, {"name": "珍珠芭樂"}, {"name": "大西瓜", "note": "南部與東部更貴"}]}
+    }
+  }
+}

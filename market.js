@@ -39,15 +39,7 @@ if ($('term')) $('term').textContent = solarTerm(now);
 const taipeiDay = new Intl.DateTimeFormat('sv-SE', {
   timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit',
 }).format(now);
-const weeklyIsCurrent = taipeiDay >= '2026-11-19' && taipeiDay <= '2026-11-22';
-if ($('weekly-status') && !weeklyIsCurrent) {
-  $('weekly-status').textContent = '歷史週報｜2026 年 11 月 19 日至 22 日。近期價格請查看蔬果批發行情。';
-}
-if ($('vegetable-weekly-status') && taipeiDay > '2026-11-22') {
-  $('vegetable-weekly-status').textContent = '歷史週報｜2026 年 11 月 16 日至 22 日。近期價格請查看蔬果批發行情。';
-}
 const selected = monthly[month - 1].map((key) => produce[key]);
-const priceElements = new Map();
 const number = new Intl.NumberFormat('zh-TW', {maximumFractionDigits:1});
 const pageSize = 9;
 const browseGroups = new Map([
@@ -162,21 +154,98 @@ function showSeasonalPicks() {
   }
 }
 
-if ($('home-weekly')) $('home-weekly').hidden = taipeiDay <= '2026-11-22';
+const reportSections = [
+  {key: 'vegetables', label: '蔬菜', period: 'vegetable-period', content: 'vegetable-weekly-content', origin: 'vegetable-weekly', anchor: 'vegetable-weekly'},
+  {key: 'fruits', label: '水果', period: 'fruit-period', content: 'fruit-weekly-content', origin: 'fruit-weekly', anchor: 'weekly'},
+];
+const reportGroups = [
+  ['priority', '優先看'],
+  ['steady', '價格較穩'],
+  ['compare', '先比價'],
+];
 
-function showPriceCards() {
-  const priceItems = new Map(selected.map(([name, , code]) => [code, name]));
-  if (weeklyIsCurrent) {
-    for (const [code, name] of [['E1', '柳橙'], ['C1', '椪柑'], ['W1', '網紋紅肉洋香瓜'], ['W2', '網紋綠肉洋香瓜']]) {
-      priceItems.set(code, name);
-    }
+function reportPeriod(report) {
+  const shortDate = (date) => date.slice(5).split('-').map(Number).join('/');
+  return shortDate(report.start) + '–' + shortDate(report.end);
+}
+
+function renderWeeklyReport(section, report) {
+  const period = reportPeriod(report);
+  const homeLabel = $('home-' + section.period);
+  if (homeLabel) homeLabel.textContent = section.label + ' ' + period;
+  const content = $(section.content);
+  if (!content) return;
+  $(section.period).textContent = period;
+  const expired = taipeiDay > report.end;
+  const status = expired ? '歷史週報。點有底色的品項找店家。' : '市場預測。點有底色的品項找店家。';
+  const rows = element('dl', '', 'weekly-rows');
+  for (const [key, label] of reportGroups) {
+    const group = report.groups[key];
+    const row = element('div', '');
+    const choices = element('dd', '');
+    group.items.forEach((item, index) => {
+      if (index) choices.append(document.createTextNode('、'));
+      if (item.farmQuery) {
+        const link = element('a', item.name, 'produce-link');
+        link.href = 'farms.html?' + new URLSearchParams({q: item.farmQuery, from: section.origin});
+        choices.append(link);
+      } else {
+        choices.append(element('span', item.name));
+      }
+      if (item.note) choices.append(element('span', '（' + item.note + '）', 'meta'));
+    });
+    if (group.note) choices.append(element('span', '（' + group.note + '）', 'meta'));
+    row.append(element('dt', label), choices);
+    rows.append(row);
   }
-  for (const [code, name] of priceItems) {
-    const card = element('article', '', 'card');
-    const price = element('p', '讀取行情中', 'price');
-    priceElements.set(code, price);
-    card.append(element('h3', name), price);
-    $('quotes').append(card);
+  const source = element('p', '來源 ', 'meta');
+  const attribution = safeLink('Threads ' + report.source.account + '〈' + report.source.title + '〉', report.source.url);
+  if (attribution) source.append(attribution);
+  content.replaceChildren(element('p', status, 'meta'), rows, source);
+}
+
+function showPriceCards(reports) {
+  const cards = [];
+  for (const section of reportSections) {
+    const report = reports[section.key];
+    const wrapper = element('section', '', 'price-section');
+    const suffix = taipeiDay > report.end ? '（週報已存檔）' : '';
+    wrapper.append(element('h2', section.label + ' ' + reportPeriod(report) + suffix));
+    const grid = element('div', '', 'grid');
+    const foods = new Map();
+    for (const [key, label] of reportGroups.slice(0, 2)) {
+      for (const item of report.groups[key].items) {
+        if (!foods.has(item.name)) foods.set(item.name, {item, label});
+      }
+    }
+    for (const {item, label} of foods.values()) {
+      const card = element('article', '', 'card');
+      const quote = element('div', '讀取行情中', 'price-quotes');
+      card.append(element('span', label, 'tag'), element('h3', item.name), quote);
+      cards.push({item, quote});
+      grid.append(card);
+    }
+    wrapper.append(grid);
+    $('quotes').append(wrapper);
+  }
+  return cards;
+}
+
+async function loadWeeklyReports() {
+  try {
+    const response = await fetch('weekly-reports.json', {cache: 'no-cache'});
+    if (!response.ok) throw new Error('週報讀取失敗');
+    const reports = await response.json();
+    for (const section of reportSections) renderWeeklyReport(section, reports[section.key]);
+    if ($('home-weekly')) {
+      $('home-weekly').hidden = !reportSections.every(({key}) => taipeiDay > reports[key].end);
+    }
+    if ($('quotes')) loadPrices(showPriceCards(reports));
+  } catch {
+    if ($('quote-status')) $('quote-status').textContent = '暫時無法載入週報推薦品項。';
+    for (const {content} of reportSections) {
+      if ($(content)) $(content).textContent = '暫時無法載入週報。';
+    }
   }
 }
 
@@ -356,26 +425,41 @@ function marketDate(value) {
   return [year + 1911, month, day].join('/');
 }
 
-async function loadPrices() {
+async function loadPrices(cards) {
   try {
     const response = await fetch('https://data.moa.gov.tw/api/v1/AgriProductsTransType/', {signal: AbortSignal.timeout(12000)});
     if (!response.ok) throw new Error('行情讀取失敗');
     const {Data: records} = await response.json();
     if (!Array.isArray(records) || !records.length) throw new Error('無交易資料');
-    for (const [code, price] of priceElements) {
-      const quote = records.find((record) => record.CropCode === code && record.MarketCode === '104' &&
-        Number(record.Avg_Price) > 0 && Number(record.Trans_Quantity) > 0 &&
-        /^\d{3}\.\d{1,2}\.\d{1,2}$/.test(record.TransDate));
-      if (!quote) {
-        price.textContent = '目前未取得此品項行情';
+    const market = records.filter((record) => record.MarketCode === '104' &&
+      Number(record.Avg_Price) > 0 && Number(record.Trans_Quantity) > 0 &&
+      /^\d{3}\.\d{1,2}\.\d{1,2}$/.test(record.TransDate));
+    const dateKey = (date) => date.split('.').reduce((value, part) => value * 100 + Number(part), 0);
+    market.sort((a, b) => dateKey(b.TransDate) - dateKey(a.TransDate));
+    for (const {item, quote} of cards) {
+      const seen = new Set();
+      const matching = market.filter((record) => {
+        const codeMatch = item.quoteCodes?.includes(record.CropCode);
+        const nameMatch = item.quoteNames?.some((name) => record.CropName?.includes(name)) &&
+          !record.CropName.includes('進口');
+        if (seen.has(record.CropCode) || !(codeMatch || nameMatch)) return false;
+        seen.add(record.CropCode);
+        return true;
+      });
+      if (!matching.length) {
+        quote.textContent = '本次台北二市場資料未列此品項';
         continue;
       }
-      price.textContent = 'NT$ ' + number.format(quote.Avg_Price) + '／公斤';
-      price.after(element('p', quote.CropName + ' · ' + marketDate(quote.TransDate), 'meta'));
+      quote.replaceChildren(...matching.map((record) => {
+        const row = element('p', '');
+        row.append(element('strong', 'NT$ ' + number.format(record.Avg_Price) + '／公斤', 'price'),
+          element('span', record.CropName + ' · ' + marketDate(record.TransDate), 'meta quote-detail'));
+        return row;
+      }));
     }
     $('quote-status').textContent = '';
   } catch {
-    for (const price of priceElements.values()) price.textContent = '行情暫時無法載入';
+    for (const {quote} of cards) quote.textContent = '行情暫時無法載入';
     $('quote-status').textContent = '可透過下方的農業部連結查詢。';
   }
 }
@@ -427,10 +511,7 @@ if ($('filters')) {
   resetResults();
 }
 if ($('filters') || $('picks')) loadFarms();
-if ($('quotes')) {
-  showPriceCards();
-  loadPrices();
-}
+if ($('home-vegetable-period') || $('vegetable-weekly-content') || $('quotes')) loadWeeklyReports();
 
 const sourceReturn = $('source-return');
 if (sourceReturn) {
