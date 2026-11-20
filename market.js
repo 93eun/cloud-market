@@ -128,20 +128,21 @@ function itemsForQuery(farm, query) {
 
 function showSeasonalPicks() {
   const home = $('home-picks');
-  const target = home || $('picks');
-  if (!target) return;
+  const lists = {'蔬菜': $('vegetable-picks'), '水果': $('fruit-picks')};
+  if (!home && !$('picks')) return;
   for (const [name, category, , query, note] of selected) {
-    const shopCount = farms.filter((farm) => itemsForQuery(farm, searchKey(query)).length).length;
-    if (home && !shopCount) continue;
+    const key = searchKey(query);
+    const shopCount = farms.filter((farm) => itemsForQuery(farm, key).length).length;
     if (home) {
+      if (!shopCount) continue;
       const link = element('a', '');
       link.href = 'farms.html?q=' + encodeURIComponent(query);
-      link.append(element('strong', name), element('span', shopCount + ' 家有列出此品項', 'meta'));
-      target.append(link);
+      link.append(element('strong', name), element('span', shopCount + ' 家', 'meta'));
+      home.append(link);
       continue;
     }
-    const card = element('article', '', 'card pick');
-    card.append(element('span', category, 'tag'), element('h3', name), element('p', note));
+    const card = element('li', '', 'card pick');
+    card.append(element('h4', name), element('p', note));
     if (shopCount) {
       const link = element('a', '找' + name + '店家', 'pick-link');
       link.href = 'farms.html?q=' + encodeURIComponent(query);
@@ -149,7 +150,7 @@ function showSeasonalPicks() {
     } else {
       card.append(element('p', '名錄暫無販售店家', 'meta'));
     }
-    target.append(card);
+    lists[category].append(card);
   }
 }
 
@@ -224,8 +225,7 @@ function renderFarms() {
     const title = element('div', '', 'farm-title');
     const profileText = element('div', '');
     const brand = farm['品牌名稱'];
-    const initial = brand.match(/[\p{L}\p{N}]/u)?.[0]?.toLocaleUpperCase('zh-TW') || '農';
-    const icon = element('span', initial, 'farm-icon');
+    const icon = element('span', '', 'farm-icon');
     icon.setAttribute('aria-hidden', 'true');
     const tone = (brand.codePointAt(0) || 0) % 3;
     icon.classList.add('farm-icon-tone-' + tone);
@@ -390,7 +390,7 @@ if ($('quotes')) {
   loadPrices();
 }
 
-async function loadPublishTime() {
+async function loadPublishDate() {
   const display = $('published-at');
   if (!display) return;
   try {
@@ -398,14 +398,14 @@ async function loadPublishTime() {
     const modified = response.headers.get('Last-Modified');
     const time = new Date(modified || '');
     if (!response.ok || Number.isNaN(time.getTime())) throw new Error('無發布時間');
-    display.dateTime = time.toISOString();
-    display.textContent = new Intl.DateTimeFormat('zh-TW', {
+    const date = new Intl.DateTimeFormat('sv-SE', {
       timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
-    }).format(time) + '（台灣時間）';
+    }).format(time);
+    display.dateTime = date;
+    display.textContent = date.replaceAll('-', '/');
   } catch {
     display.textContent = '暫時無法查詢';
   }
 }
 
-loadPublishTime();
+loadPublishDate();

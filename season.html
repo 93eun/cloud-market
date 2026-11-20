@@ -6,8 +6,8 @@
 <meta name="description" content="台灣小農購買指南，依節氣找當季蔬果、參考批發行情，直接前往小農的購買管道。">
 <meta name="theme-color" content="#f8f5ed">
 <title>當季推薦｜雲端菜市場</title>
-<link rel="stylesheet" href="market.css?v=10">
-<script defer src="market.js?v=10"></script>
+<link rel="stylesheet" href="market.css?v=11">
+<script defer src="market.js?v=11"></script>
 </head>
 <body>
 <aside class="safety-banner" aria-label="防詐提醒">
@@ -60,7 +60,16 @@
   <p class="term">目前節氣 <strong id="term">—</strong></p>
   <h2>本月當季蔬果</h2>
   <p class="section-note muted">依台灣常見產季整理。採收與供貨情形請向店家確認。</p>
-  <div class="grid" id="picks"></div>
+  <div class="seasonal-picks" id="picks">
+    <div class="seasonal-row">
+      <h3 class="seasonal-label vegetable-label" id="vegetable-label">蔬菜</h3>
+      <ul class="seasonal-items" id="vegetable-picks" aria-labelledby="vegetable-label"></ul>
+    </div>
+    <div class="seasonal-row">
+      <h3 class="seasonal-label fruit-label" id="fruit-label">水果</h3>
+      <ul class="seasonal-items" id="fruit-picks" aria-labelledby="fruit-label"></ul>
+    </div>
+  </div>
 </section>
 </main>
 <footer>
@@ -73,7 +82,7 @@
       在法律允許範圍內，整理者不對因使用本站資訊或與第三方交易所生的損失負賠償責任。<br>
       依法不得免除的責任仍依法律規定。</p>
   </section>
-  <p class="site-dates"><span>網站最近發布 <time id="published-at">查詢中</time></span><span>小農名錄整理至 <time datetime="2026-10-05">2026/10/05</time></span></p>
+  <p class="site-dates"><span>網站最近發布日期 <time id="published-at">查詢中</time></span><span>小農名錄整理至 <time datetime="2026-10-05">2026/10/05</time></span></p>
 </footer>
 </body>
 </html>
