@@ -201,3 +201,7 @@ footer { border-top: 1px solid var(--line); padding: .85rem 0; color: var(--mute
 .quote-detail { display: block; margin: .05rem 0 0; }
 
 .price-section .grid { justify-content: flex-start; }
+
+.full-weekly { border-top: 1px solid var(--line); padding-top: .15rem; }
+.full-weekly summary { color: var(--green-dark); }
+.weekly-original { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; padding-bottom: .25rem; }

@@ -202,6 +202,14 @@ function renderWeeklyReport(section, report) {
   const attribution = safeLink('Threads ' + report.source.account + '〈' + report.source.title + '〉', report.source.url);
   if (attribution) source.append(attribution);
   content.replaceChildren(element('p', status, 'meta'), rows, source);
+  if (report.fullText) {
+    const full = element('details', '', 'full-weekly');
+    full.append(
+      element('summary', '展開完整' + section.label + '週報'),
+      element('div', report.fullText, 'weekly-original')
+    );
+    content.append(full);
+  }
 }
 
 function showPriceCards(reports) {
