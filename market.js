@@ -211,13 +211,15 @@ function renderFarms() {
     if (farm['備註']) card.append(element('p', farm['備註'], 'meta'));
     const links = element('div', '', 'links');
     const purchase = safeLink(channelLabels.get(farm['購買管道']) || '前往購買管道', farm['傳送門']);
-    const profile = safeLink('Threads 帳號', farm['@帳號']);
+    const profile = safeLink(purchase ? 'Threads 帳號' : '前往店家 Threads', farm['@帳號']);
     if (purchase) {
       purchase.className = 'purchase';
       links.append(purchase);
     }
-    else if (farm['傳送門']) links.append(element('span', '聯絡方式：' + farm['傳送門'], 'meta'));
-    if (profile && profile.href !== purchase?.href) links.append(profile);
+    if (profile && profile.href !== purchase?.href) {
+      if (!purchase) profile.className = 'purchase';
+      links.append(profile);
+    }
     if (links.childNodes.length) card.append(links);
     return card;
   }));
@@ -352,3 +354,23 @@ if ($('quotes')) {
   showPriceCards();
   loadPrices();
 }
+
+async function loadPublishTime() {
+  const display = $('published-at');
+  if (!display) return;
+  try {
+    const response = await fetch('index.html', {method: 'HEAD', cache: 'no-cache', signal: AbortSignal.timeout(8000)});
+    const modified = response.headers.get('Last-Modified');
+    const time = new Date(modified || '');
+    if (!response.ok || Number.isNaN(time.getTime())) throw new Error('無發布時間');
+    display.dateTime = time.toISOString();
+    display.textContent = new Intl.DateTimeFormat('zh-TW', {
+      timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+    }).format(time) + '（台灣時間）';
+  } catch {
+    display.textContent = '暫時無法查詢';
+  }
+}
+
+loadPublishTime();

@@ -115,3 +115,8 @@ footer { border-top: 1px solid var(--line); padding: .85rem 0; color: var(--mute
   .safety-banner p { line-height: 1.45; }
   .hero-copy { padding: .9rem; }
 }
+
+.disclaimer-link { display: inline-block; margin-inline-start: .65rem; }
+.disclaimer { max-width: 52rem; margin: 0 0 .9rem; }
+.disclaimer h2 { font-size: 1rem; }
+.site-dates { display: flex; flex-wrap: wrap; column-gap: 1.2rem; row-gap: .2rem; border-top: 1px solid var(--line); padding-top: .6rem; }
