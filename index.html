@@ -4,47 +4,55 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="台灣小農購買指南，依節氣找當季蔬果、參考批發行情，直接前往小農的購買管道。">
-<meta name="theme-color" content="#183d2e">
+<meta name="theme-color" content="#f8f5ed">
 <title>雲端菜市場</title>
-<link rel="stylesheet" href="market.css?v=5">
-<script defer src="market.js?v=5"></script>
+<link rel="stylesheet" href="market.css?v=6">
+<script defer src="market.js?v=6"></script>
 </head>
 <body>
 <aside class="safety-banner" aria-label="防詐提醒">
   <p><strong>防詐提醒</strong>　請走店家官方管道，勿匯款給不明帳號。遇到可疑要求請撥 <a href="tel:165">165</a>。</p>
 </aside>
-<header><nav aria-label="市場導覽"><a href="index.html" aria-current="page">首頁</a><a href="farms.html">找小農</a><a href="season.html">看當季推薦</a><a href="prices.html">查蔬果行情</a></nav><div class="intro"><h1>雲端菜市場</h1><p>找台灣小農、看當季推薦、查蔬果行情。</p><form class="site-search" id="filters" action="farms.html" method="get" role="search">
-  <input id="search" type="search" name="q" aria-label="搜尋品項或店家" placeholder="輸入品項或店家名稱">
-  <button type="submit">搜尋</button>
-</form></div></header>
-<main>
-<section class="search-tools" aria-label="依品項找店家">
-  <div class="quick-products" id="quick-products" aria-label="快速找品項">
-    <span>點品項找店家</span>
-    <button type="button" data-product="高麗菜">高麗菜</button>
-    <button type="button" data-product="地瓜">地瓜</button>
-    <button type="button" data-product="小番茄">小番茄</button>
-    <button type="button" data-product="芭樂">芭樂</button>
-    <button type="button" data-product="柳丁">柳丁</button>
-    <button type="button" data-product="草莓">草莓</button>
-  </div>
-  <details class="product-index">
-    <summary>瀏覽全部品項</summary>
-    <div class="quick-products" id="product-list"></div>
-  </details>
-</section>
-<section id="search-results" hidden aria-labelledby="results-heading">
-  <div class="result-heading"><h2 id="results-heading" tabindex="-1">搜尋結果</h2><button type="button" id="clear">清除搜尋</button></div>
-  <p id="count" role="status">正在載入小農名錄。</p>
-  <div class="grid" id="farms"></div>
-  <button id="more" type="button" hidden>顯示更多店家</button>
-</section>
-<section><h2>市場地圖</h2><div class="map-links">
-  <a id="directory" class="card map-card" href="farms.html"><strong>找小農</strong><span>輸入想買的品項，找到店家和購買方式。</span></a>
-  <a id="season" class="card map-card" href="season.html"><strong>看當季推薦</strong><span>跟著節氣選蔬果，查看附有來源的週報。</span></a>
-  <a id="prices" class="card map-card" href="prices.html"><strong>查蔬果行情</strong><span>查看批發價、交易日期和品種。</span></a>
-  </div></section>
+<header><nav aria-label="市場導覽"><a class="brand" href="index.html">雲端菜市場</a><div class="nav-links"><a href="index.html" aria-current="page">首頁</a><a href="farms.html">找小農</a><a href="season.html">當季與週報</a><a id="prices" href="prices.html">批發行情</a></div></nav></header>
+<main class="home">
+  <section class="hero" aria-labelledby="home-title">
+    <div class="hero-copy">
+      <h1 id="home-title">今天想買什麼？</h1>
+      <p>想在家買菜，也能直接跟台灣小農買。從想煮的食材開始找。</p>
+      <form class="site-search" id="filters" action="farms.html" method="get" role="search">
+        <label class="visually-hidden" for="search">搜尋品項或店家</label>
+        <input id="search" type="search" name="q" placeholder="試試高麗菜、柳丁，或店家名稱">
+        <button type="submit" class="primary">找店家</button>
+      </form>
+      <div class="browse-links" aria-label="依類別逛小農">
+        <a href="farms.html?category=蔬菜">逛蔬菜</a>
+        <a href="farms.html?category=水果">逛水果</a>
+        <a id="directory" href="farms.html">看全部小農</a>
+      </div>
+    </div>
+    <img class="hero-image" src="market-basket.webp" width="960" height="640" alt="竹籃裡盛著高麗菜、柑橘、小番茄和地瓜">
+  </section>
 
+  <section id="search-results" hidden aria-labelledby="results-heading">
+    <div class="result-heading">
+      <h2 id="results-heading" tabindex="-1">搜尋結果</h2>
+      <button type="button" id="clear" class="quiet-button">清除搜尋</button>
+    </div>
+    <p id="count" role="status">正在載入小農名錄。</p>
+    <p id="no-results" hidden><a href="farms.html">逛小農名錄</a>　<a href="season.html">看當季推薦</a></p>
+  <div class="grid" id="farms"></div>
+    <button id="more" type="button" hidden>顯示更多店家</button>
+  </section>
+
+  <section id="shop-ideas" class="ideas" aria-labelledby="ideas-title">
+    <div class="ideas-copy">
+      <h2 id="ideas-title">不知道要買什麼？</h2>
+      <p>先看當季食材，再參考週報決定今天買哪些。</p>
+      <a id="season" class="text-link" href="season.html">看當季推薦與週報</a>
+      <p id="home-weekly" class="meta">水果週報 11/19–11/22 · Threads @abc89151207</p>
+    </div>
+    <div id="home-picks" class="home-picks" aria-label="從當季品項找店家"></div>
+  </section>
 </main>
 <footer>雲端菜市場 · 台灣小農購買指南</footer>
 </body>

@@ -4,22 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="台灣小農購買指南，依節氣找當季蔬果、參考批發行情，直接前往小農的購買管道。">
-<meta name="theme-color" content="#183d2e">
+<meta name="theme-color" content="#f8f5ed">
 <title>當季推薦｜雲端菜市場</title>
-<link rel="stylesheet" href="market.css?v=5">
-<script defer src="market.js?v=5"></script>
+<link rel="stylesheet" href="market.css?v=6">
+<script defer src="market.js?v=6"></script>
 </head>
 <body>
 <aside class="safety-banner" aria-label="防詐提醒">
   <p><strong>防詐提醒</strong>　請走店家官方管道，勿匯款給不明帳號。遇到可疑要求請撥 <a href="tel:165">165</a>。</p>
 </aside>
-<header><nav aria-label="市場導覽"><a href="index.html">首頁</a><a href="farms.html">找小農</a><a href="season.html" aria-current="page">看當季推薦</a><a href="prices.html">查蔬果行情</a></nav><div class="intro"><h1>當季推薦</h1><p>看節氣、當季蔬果與每期週報。</p><form class="site-search" action="farms.html" method="get" role="search"><input type="search" name="q" aria-label="搜尋蔬果或店家" placeholder="搜尋蔬果或店家"><button type="submit">搜尋</button></form></div></header>
+<header><nav aria-label="市場導覽"><a class="brand" href="index.html">雲端菜市場</a><div class="nav-links"><a href="index.html">首頁</a><a href="farms.html">找小農</a><a href="season.html" aria-current="page">當季與週報</a><a href="prices.html">批發行情</a></div></nav><div class="intro"><h1>當季推薦</h1><p>看節氣、當季蔬果與每期週報。</p><form class="site-search" action="farms.html" method="get" role="search"><input type="search" name="q" aria-label="搜尋蔬果或店家" placeholder="搜尋蔬果或店家"><button type="submit">搜尋</button></form></div></header>
 <main>
 <section id="season">
   <p class="term">目前節氣 <strong id="term">—</strong></p>
-  <h2>這個節氣買什麼？</h2>
-  <div class="weekly">
-    <h3>水果週報｜11/19–11/22</h3>
+  <h2>本月當季蔬果</h2>
+  <p class="section-note muted">依台灣常見產季整理。採收與供貨情形請向店家確認。</p>
+  <div class="grid" id="picks"></div>
+</section>
+<section class="weekly" id="weekly">
+    <h2>水果週報｜11/19–11/22</h2>
     <p class="section-note muted" id="weekly-status">2026 年 11 月 19 日至 22 日的市場預測，各地行情可能不同。</p>
     <div class="grid">
       <article class="card pick"><h3>可以先買</h3><p>網紋紅肉或綠肉洋香瓜、紅肉葡萄柚、小玉西瓜。</p><p class="meta">週報也點名新疆洋香瓜和光面綠肉洋香瓜。三重的光面綠肉行情微漲。</p></article>
@@ -28,10 +31,6 @@
     </div>
     <details><summary>認識當季水果：椪柑</summary><p>椪柑主產期約為 10 月到隔年 2 月。秋冬在台南、嘉義常見剛採收的青皮椪柑，果皮帶綠也可能已成熟。入冬後，台中、苗栗採收的椪柑有些會經過貯藏，隔年春天仍可能買得到。</p></details>
     <p class="meta">來源：<a href="https://www.threads.com/@abc89151207">Threads @abc89151207</a>，依〈每週評水果市場〉摘要整理。週報的價格評估排除自有品牌、進口水果及自產自銷品項。</p>
-  </div>
-  <h3>本月當季蔬果</h3>
-  <p class="section-note muted">依台灣常見產季整理。採收與供貨情形請向店家確認。</p>
-  <div class="grid" id="picks"></div>
 </section>
 </main>
 <footer>雲端菜市場 · 台灣小農購買指南</footer>

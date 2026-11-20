@@ -11,6 +11,7 @@ const produce = {
   pineapple: ['鳳梨', '水果', 'B2', '鳳梨', '春夏可留意金鑽鳳梨。'],
   cucumber: ['小黃瓜', '蔬菜', 'FD1', '小黃瓜', '適合涼拌，挑選時可留意果身是否緊實。'],
   luffa: ['絲瓜', '蔬菜', 'FF1', '絲瓜', '暖季常見，適合清炒或煮湯。'],
+  sweetpotato: ['地瓜', '蔬菜', 'SO1', '地瓜', '想簡單煮晚餐，可以蒸熟當主食。'],
   pumpkin: ['南瓜', '蔬菜', 'FT2', '南瓜', '適合蒸煮，切開後可分裝料理。'],
   watermelon: ['西瓜', '水果', 'T5', '西瓜', '夏季水果，購買前可確認品種與大小。'],
   pomelo: ['文旦', '水果', 'H1', '文旦', '初秋可留意文旦，依產地確認採收時間。'],
@@ -22,7 +23,7 @@ const monthly = [
   ['cucumber','pineapple','watermelon'], ['luffa','watermelon','mango'],
   ['luffa','watermelon','mango'], ['luffa','mango','guava'],
   ['pumpkin','pomelo','guava'], ['pumpkin','guava','orange'],
-  ['cabbage','orange','ponkan'], ['cabbage','tomato','orange'],
+  ['cabbage','sweetpotato','orange','ponkan'], ['cabbage','tomato','orange'],
 ];
 
 function solarTerm(date) {
@@ -46,6 +47,29 @@ const selected = monthly[month - 1].map((key) => produce[key]);
 const priceElements = new Map();
 const number = new Intl.NumberFormat('zh-TW', {maximumFractionDigits:1});
 const pageSize = 9;
+const browseGroups = new Map([
+  ['珍珠芭樂', '芭樂'],
+  ['履歷生菜', '生菜'],
+  ['歐式生菜', '生菜'],
+  ['生菜萵苣', '生菜'],
+  ['高山櫛瓜', '櫛瓜'],
+  ['高山有機櫛瓜', '櫛瓜'],
+  ['韓國櫛瓜', '櫛瓜'],
+  ['溫室小黃瓜', '小黃瓜'],
+  ['溫室葡萄', '葡萄'],
+  ['麻豆文旦', '文旦'],
+]);
+const channelLabels = new Map([
+  ['官方line', '前往 LINE 詢購'],
+  ['私訊訂購', '私訊店家'],
+  ['官方網站', '前往店家網站'],
+  ['FB社團', '前往 Facebook 社團'],
+  ['賣貨便', '到賣貨便選購'],
+  ['google表單', '開啟訂購表單'],
+  ['全家', '前往全家賣場'],
+  ['蝦皮', '前往蝦皮賣場'],
+  ['momo', '前往 momo 賣場'],
+]);
 let visibleCount = pageSize;
 let farms = [];
 let directoryReady = false;
@@ -94,14 +118,40 @@ function productButton(name) {
   return button;
 }
 
-if ($('picks')) {
+function itemsForQuery(farm, query) {
+  return farm.items.filter(({key}) => query && key.includes(query) &&
+    !(query === '西瓜' && key.includes('西瓜李')));
+}
+
+function showSeasonalPicks() {
+  const home = $('home-picks');
+  const target = home || $('picks');
+  if (!target) return;
   for (const [name, category, , query, note] of selected) {
+    const shopCount = farms.filter((farm) => itemsForQuery(farm, searchKey(query)).length).length;
+    if (home && !shopCount) continue;
+    if (home) {
+      const link = element('a', '');
+      link.href = 'farms.html?q=' + encodeURIComponent(query);
+      link.append(element('strong', name), element('span', shopCount + ' 家有列出此品項', 'meta'));
+      target.append(link);
+      continue;
+    }
     const card = element('article', '', 'card pick');
-    const link = element('a', '找' + name + '店家', 'pick-link');
-    link.href = 'farms.html?q=' + encodeURIComponent(query);
-    card.append(element('span', category, 'tag'), element('h3', name), element('p', note), link);
-    $('picks').append(card);
+    card.append(element('span', category, 'tag'), element('h3', name), element('p', note));
+    if (shopCount) {
+      const link = element('a', '找' + name + '店家', 'pick-link');
+      link.href = 'farms.html?q=' + encodeURIComponent(query);
+      card.append(link);
+    } else {
+      card.append(element('p', '名錄暫無販售店家', 'meta'));
+    }
+    target.append(card);
   }
+}
+
+if ($('home-weekly') && !weeklyIsCurrent) {
+  $('home-weekly').textContent = '水果週報存檔 11/19–11/22 · Threads @abc89151207';
 }
 
 function showPriceCards() {
@@ -124,12 +174,14 @@ function renderFarms() {
   const query = searchKey($('search').value);
   const category = $('category')?.value;
   const homeResults = $('search-results');
-  if (homeResults) homeResults.hidden = !query;
+  if (homeResults) {
+    homeResults.hidden = !query;
+    $('shop-ideas').hidden = Boolean(query);
+  }
   if (!directoryReady || (homeResults && !query)) return;
   const results = farms.flatMap((farm) => {
     if (category && !farm.categories.includes(category)) return [];
-    const items = farm.items.filter(({key}) => query && key.includes(query) &&
-      !(query === '西瓜' && key.includes('西瓜李')));
+    const items = itemsForQuery(farm, query);
     const brandMatch = farm.brandKey.includes(query);
     const categoryMatch = farm.categories.some((value) => searchKey(value) === query);
     if (query && !items.length && !brandMatch && !categoryMatch) return [];
@@ -138,12 +190,17 @@ function renderFarms() {
   });
   if (query) results.sort((a, b) => a.rank - b.rank);
   $('count').textContent = results.length ? '找到 ' + results.length + ' 家店家' :
-    '小農名錄目前沒有這個結果。可換個名稱、清除篩選，或展開「瀏覽全部品項」。';
+    '名錄目前沒有符合的店家。可換個名稱，或清除篩選重找。';
+  $('no-results').hidden = Boolean(results.length);
   $('more').hidden = results.length <= visibleCount;
   $('farms').replaceChildren(...results.slice(0, visibleCount).map(({farm, items}) => {
-    const card = element('article', '', 'card');
+    const card = element('article', '', 'card farm-card');
     card.append(element('h3', farm['品牌名稱']));
-    for (const tag of [farm['產地縣市'], ...farm.categories].filter(Boolean)) card.append(element('span', tag, 'tag'));
+    const tags = element('div', '');
+    for (const tag of [farm['產地縣市'], ...farm.categories].filter(Boolean)) {
+      tags.append(element('span', tag, 'tag'));
+    }
+    if (tags.childNodes.length) card.append(tags);
     if (items.length) {
       card.append(element('p', items.map(({name}) => name).join('、'), 'matched-products'));
     }
@@ -152,15 +209,14 @@ function renderFarms() {
       card.append(element('p', (items.length ? '也販售 ' : '') + otherItems.map(({name}) => name).join('、')));
     }
     if (farm['備註']) card.append(element('p', farm['備註'], 'meta'));
-    if (farm['購買管道']) card.append(element('p', '購買管道：' + farm['購買管道'], 'meta'));
     const links = element('div', '', 'links');
-    const purchase = safeLink('前往購買管道', farm['傳送門']);
+    const purchase = safeLink(channelLabels.get(farm['購買管道']) || '前往購買管道', farm['傳送門']);
     const profile = safeLink('Threads 帳號', farm['@帳號']);
     if (purchase) {
       purchase.className = 'purchase';
       links.append(purchase);
     }
-    else if (farm['傳送門']) links.append(element('span', farm['傳送門'], 'meta'));
+    else if (farm['傳送門']) links.append(element('span', '聯絡方式：' + farm['傳送門'], 'meta'));
     if (profile && profile.href !== purchase?.href) links.append(profile);
     if (links.childNodes.length) card.append(links);
     return card;
@@ -176,27 +232,44 @@ async function loadFarms() {
   try {
     const response = await fetch('farms.json');
     if (!response.ok) throw new Error('名錄讀取失敗');
-    farms = (await response.json()).map((farm) => ({
-      ...farm,
-      categories: JSON.parse(farm['販售類別'] || '[]'),
-      brandKey: searchKey(farm['品牌名稱']),
-      items: (farm['販售品項'] || '').split(/[｜|、]/).map((name) => name.trim()).filter(Boolean)
-        .map((name) => ({name, key: searchKey(name)})),
-    }));
+    farms = (await response.json()).map((farm) => {
+      const items = new Map();
+      for (const name of (farm['販售品項'] || '').split(/[｜|、]/).map((name) => name.trim()).filter(Boolean)) {
+        const key = searchKey(name);
+        if (!items.has(key)) items.set(key, {name, key});
+      }
+      return {
+        ...farm,
+        categories: JSON.parse(farm['販售類別'] || '[]'),
+        brandKey: searchKey(farm['品牌名稱']),
+        items: [...items.values()],
+      };
+    });
     const select = $('category');
     if (select) {
       const categories = [...new Set(farms.flatMap((farm) => farm.categories))];
       for (const category of categories.sort((a, b) => a.localeCompare(b, 'zh-TW'))) {
         select.append(new Option(category, category));
       }
+      const requested = new URLSearchParams(location.search).get('category');
+      if (categories.includes(requested)) select.value = requested;
     }
-    const labels = [...new Set(farms.flatMap((farm) => farm.items.map(({name}) => name)))];
-    labels.sort((a, b) => a.localeCompare(b, 'zh-TW'));
-    $('product-list').append(...labels.map(productButton));
+    const list = $('product-list');
+    if (list) {
+      const labels = new Map();
+      for (const {name, key} of farms.flatMap((farm) => farm.items)) {
+        const group = browseGroups.get(key) || key;
+        if (!labels.has(group)) labels.set(group, name);
+        if (group !== key || labels.get(group) !== name) labels.set(group, group);
+      }
+      list.append(...[...labels.values()].sort((a, b) => a.localeCompare(b, 'zh-TW')).map(productButton));
+    }
     directoryReady = true;
-    renderFarms();
+    if ($('filters')) renderFarms();
+    showSeasonalPicks();
   } catch {
-    $('count').textContent = '暫時無法讀取名錄，請稍後重新整理。';
+    if ($('count')) $('count').textContent = '暫時無法讀取名錄，請稍後重新整理。';
+    if ($('picks')) $('picks').textContent = '暫時無法查詢當季品項的販售店家。';
   }
 }
 
@@ -261,8 +334,7 @@ if ($('filters')) {
     resetResults();
     focusResults();
   }
-  $('quick-products').addEventListener('click', chooseProduct);
-  $('product-list').addEventListener('click', chooseProduct);
+  $('product-list')?.addEventListener('click', chooseProduct);
   $('more').addEventListener('click', () => {
     const firstNewCard = visibleCount;
     visibleCount += pageSize;
@@ -274,8 +346,8 @@ if ($('filters')) {
     }
   });
   resetResults();
-  loadFarms();
 }
+if ($('filters') || $('picks')) loadFarms();
 if ($('quotes')) {
   showPriceCards();
   loadPrices();
