@@ -6,19 +6,23 @@
 <meta name="description" content="台灣小農購買指南，依節氣找當季蔬果、參考批發行情，直接前往小農的購買管道。">
 <meta name="theme-color" content="#f8f5ed">
 <title>雲端菜市場</title>
-<link rel="stylesheet" href="market.css?v=16">
-<script defer src="market.js?v=16"></script>
+<link rel="stylesheet" href="market.css?v=18">
+<script defer src="market.js?v=18"></script>
 </head>
 <body>
 <aside class="safety-banner" aria-label="防詐提醒">
-  <p><strong>防詐提醒</strong>　下單前先確認店家身分和網址。請勿提供驗證碼，也不要依指示操作 ATM 或匯款給不明帳戶。遇到可疑情況，請撥 <a href="tel:165">165 反詐騙專線</a>。<a class="disclaimer-link" href="#disclaimer">免責聲明</a></p>
+  <p><strong>防詐提醒</strong>　下單前先確認店家身分和網址。<br>
+    請勿提供驗證碼，也不要依指示操作 ATM 或匯款給不明帳戶。<br>
+    遇到可疑情況，請撥 <a href="tel:165">165 反詐騙專線</a>。<br>
+    <a class="disclaimer-link" href="#disclaimer">免責聲明</a></p>
 </aside>
 <header><nav aria-label="市場導覽"><a class="brand" href="index.html">雲端菜市場</a><div class="nav-links"><a href="index.html" aria-current="page">首頁</a><a href="farms.html">找小農</a><a href="season.html">當季與週報</a><a id="prices" href="prices.html">批發行情</a></div></nav></header>
 <main class="home">
   <section class="hero" aria-labelledby="home-title">
     <div class="hero-copy">
       <h1 id="home-title">今天想買什麼？</h1>
-      <p>想在家買菜，也能直接跟台灣小農買。從想煮的食材開始找。</p>
+      <p>想在家買菜，也能直接跟台灣小農買。<br>
+    從想煮的食材開始找。</p>
       <form class="site-search" id="filters" action="farms.html" method="get" role="search">
         <label class="visually-hidden" for="search">搜尋品項或店家</label>
         <input id="search" type="search" name="q" placeholder="試試高麗菜、柳丁，或店家名稱">
@@ -38,7 +42,7 @@
       <h2 id="results-heading" tabindex="-1">搜尋結果</h2>
       <button type="button" id="clear" class="quiet-button">清除搜尋</button>
     </div>
-    <p id="count" role="status">正在載入小農名錄。</p>
+    <p id="count" class="sentence-lines" role="status">正在載入小農名錄。</p>
     <p id="no-results" hidden><a href="farms.html">逛小農名錄</a>　<a href="season.html">看當季推薦</a></p>
   <div class="grid farm-grid" id="farms"></div>
     <button id="more" type="button" hidden>顯示更多店家</button>

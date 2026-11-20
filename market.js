@@ -84,6 +84,10 @@ function element(tag, value, className) {
   return item;
 }
 
+function sentenceLines(value) {
+  return value.replace(/。([」』”’）》】]*)[ \t]*(?=[^\s」』”’）》】])/g, '。$1\n');
+}
+
 function safeLink(label, value) {
   if (!value) return null;
   try {
@@ -142,7 +146,7 @@ function showSeasonalPicks() {
       continue;
     }
     const card = element('li', '', 'card pick');
-    card.append(element('h4', name), element('p', note));
+    card.append(element('h4', name), element('p', sentenceLines(note), 'sentence-lines'));
     if (shopCount) {
       const link = element('a', '找' + name + '店家', 'pick-link');
       link.href = 'farms.html?q=' + encodeURIComponent(query) + '&from=season';
@@ -201,12 +205,12 @@ function renderWeeklyReport(section, report) {
   const source = element('p', '來源 ', 'meta');
   const attribution = safeLink('Threads ' + report.source.account + '〈' + report.source.title + '〉', report.source.url);
   if (attribution) source.append(attribution);
-  content.replaceChildren(element('p', status, 'meta'), rows, source);
+  content.replaceChildren(element('p', sentenceLines(status), 'meta sentence-lines'), rows, source);
   if (report.fullText) {
     const full = element('details', '', 'full-weekly');
     full.append(
       element('summary', '展開完整' + section.label + '週報'),
-      element('div', report.fullText, 'weekly-original')
+      element('div', sentenceLines(report.fullText), 'weekly-original')
     );
     content.append(full);
   }
@@ -304,7 +308,7 @@ function renderFarms() {
   });
   if (query) results.sort((a, b) => a.rank - b.rank);
   $('count').textContent = results.length ? '找到 ' + results.length + ' 家店家' :
-    '名錄目前沒有符合的店家。可換個名稱，或清除篩選重找。';
+    sentenceLines('名錄目前沒有符合的店家。可換個名稱，或清除篩選重找。');
   $('no-results').hidden = Boolean(results.length);
   const listing = $('farms');
   const channelLinks = $('channel-links');
@@ -367,7 +371,7 @@ function farmCard({farm, items}) {
   if (otherItems.length) {
     card.append(element('p', (items.length ? '也販售 ' : '') + otherItems.map(({name}) => name).join('、')));
   }
-  if (farm['備註']) card.append(element('p', farm['備註'], 'meta'));
+  if (farm['備註']) card.append(element('p', sentenceLines(farm['備註']), 'meta sentence-lines'));
   const links = element('div', '', 'links');
   const purchase = safeLink(channels.get(farm['購買管道'])?.action || '前往購買管道', farm['傳送門']);
   const profile = safeLink(purchase ? 'Threads 帳號' : '前往店家 Threads', farm['@帳號']);
