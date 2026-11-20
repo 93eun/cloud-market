@@ -420,47 +420,36 @@ async function loadFarms() {
   }
 }
 
-function marketDate(value) {
-  const [year, month, day] = value.split('.').map(Number);
-  return [year + 1911, month, day].join('/');
-}
-
 async function loadPrices(cards) {
   try {
-    const response = await fetch('https://data.moa.gov.tw/api/v1/AgriProductsTransType/', {signal: AbortSignal.timeout(12000)});
+    const response = await fetch('tapmc-quotes.json', {cache: 'no-cache'});
     if (!response.ok) throw new Error('行情讀取失敗');
-    const {Data: records} = await response.json();
-    if (!Array.isArray(records) || !records.length) throw new Error('無交易資料');
-    const market = records.filter((record) => record.MarketCode === '104' &&
-      Number(record.Avg_Price) > 0 && Number(record.Trans_Quantity) > 0 &&
-      /^\d{3}\.\d{1,2}\.\d{1,2}$/.test(record.TransDate));
-    const dateKey = (date) => date.split('.').reduce((value, part) => value * 100 + Number(part), 0);
-    market.sort((a, b) => dateKey(b.TransDate) - dateKey(a.TransDate));
+    const {tradeDate, records} = await response.json();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(tradeDate) || !Array.isArray(records) || !records.length) {
+      throw new Error('無交易資料');
+    }
+    $('quote-status').textContent = '北農資料交易日 ' + tradeDate.replaceAll('-', '/');
     for (const {item, quote} of cards) {
-      const seen = new Set();
-      const matching = market.filter((record) => {
-        const codeMatch = item.quoteCodes?.includes(record.CropCode);
-        const nameMatch = item.quoteNames?.some((name) => record.CropName?.includes(name)) &&
-          !record.CropName.includes('進口');
-        if (seen.has(record.CropCode) || !(codeMatch || nameMatch)) return false;
-        seen.add(record.CropCode);
-        return true;
+      const matching = records.filter((record) => {
+        const codeMatch = item.quoteCodes?.includes(record.code);
+        const nameMatch = item.quoteNames?.some((name) => record.name.includes(name)) &&
+          !record.name.includes('進口');
+        return codeMatch || nameMatch;
       });
       if (!matching.length) {
-        quote.textContent = '本次台北二市場資料未列此品項';
+        quote.textContent = '北農該日資料未列此品項';
         continue;
       }
       quote.replaceChildren(...matching.map((record) => {
         const row = element('p', '');
-        row.append(element('strong', 'NT$ ' + number.format(record.Avg_Price) + '／公斤', 'price'),
-          element('span', record.CropName + ' · ' + marketDate(record.TransDate), 'meta quote-detail'));
+        row.append(element('strong', 'NT$ ' + number.format(record.price) + '／' + record.unit, 'price'),
+          element('span', record.name, 'meta quote-detail'));
         return row;
       }));
     }
-    $('quote-status').textContent = '';
   } catch {
     for (const {quote} of cards) quote.textContent = '行情暫時無法載入';
-    $('quote-status').textContent = '可透過下方的農業部連結查詢。';
+    $('quote-status').textContent = '可透過下方連結到北農查詢。';
   }
 }
 

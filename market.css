@@ -199,3 +199,5 @@ footer { border-top: 1px solid var(--line); padding: .85rem 0; color: var(--mute
 .price-section { margin: 1.2rem 0 1.55rem; }
 .price-quotes { margin-top: .35rem; }
 .quote-detail { display: block; margin: .05rem 0 0; }
+
+.price-section .grid { justify-content: flex-start; }
