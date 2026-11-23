@@ -443,7 +443,9 @@ async function loadMarketSnapshot() {
       !Array.isArray(snapshot.records) || !snapshot.records.length) {
     throw new Error('無交易資料');
   }
-  return snapshot;
+  const records = snapshot.records.filter((record) => record.originCategory === 'domestic' &&
+    !/進口|外國|國外/.test(record.name));
+  return {...snapshot, records};
 }
 
 async function showHomeCheapest() {
@@ -451,10 +453,10 @@ async function showHomeCheapest() {
   try {
     const {tradeDate, records} = await loadMarketSnapshot();
     const current = tradeDate === taipeiDay;
-    $('cheapest-title').textContent = current ? '今日蔬果最低批發價' : '最近交易日蔬果最低批發價';
+    $('cheapest-title').textContent = current ? '今日國產蔬果最低批發價' : '最近交易日國產蔬果最低批發價';
     const date = tradeDate.replaceAll('-', '/');
     status.textContent = sentenceLines((current ? '交易日 ' + date : '目前顯示最近交易日 ' + date) +
-      '。依每公斤均價排序，同價時成交量多者優先。');
+      '。依北農品項代碼排除進口與未能分類品項。依每公斤均價排序，同價時成交量多者優先。');
     const sections = [];
     for (const [category, tone] of [['蔬菜', 'green'], ['水果', 'orange']]) {
       const rows = records.filter((record) => record.category === category && record.unit === '公斤')
@@ -473,7 +475,8 @@ async function showHomeCheapest() {
         if (seen.size === 3) break;
       }
       const section = element('div', '', 'cheapest-group');
-      section.append(element('h3', category, 'seasonal-label tone-' + tone), list);
+      section.append(element('h3', category, 'seasonal-label tone-' + tone),
+        seen.size ? list : element('p', '本次未取得國產行情', 'meta'));
       sections.push(section);
     }
     $('cheapest-groups').replaceChildren(...sections);
@@ -491,14 +494,13 @@ async function loadPrices(cards) {
       const matching = records.filter((record) => {
         if (seen.has(record.code)) return false;
         const codeMatch = item.quoteCodes?.includes(record.code);
-        const nameMatch = item.quoteNames?.some((name) => record.name.includes(name)) &&
-          !record.name.includes('進口');
+        const nameMatch = item.quoteNames?.some((name) => record.name.includes(name));
         if (!codeMatch && !nameMatch) return false;
         seen.add(record.code);
         return true;
       });
       if (!matching.length) {
-        quote.textContent = '北農該日資料未列此品項';
+        quote.textContent = '北農該日未列此品項的國產行情';
         continue;
       }
       quote.replaceChildren(...matching.map((record) => {
