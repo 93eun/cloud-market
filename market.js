@@ -177,13 +177,13 @@ function renderWeeklyReport(section, report) {
   const period = reportPeriod(report);
   const homeLabel = $('home-' + section.period);
   if (homeLabel) {
-    homeLabel.textContent = section.label + ' ' + period + (taipeiDay > report.end ? '（已存檔）' : '');
+    homeLabel.textContent = section.label + ' ' + period + (taipeiDay > report.end ? '（已過期）' : '');
   }
   const content = $(section.content);
   if (!content) return;
   $(section.period).textContent = period;
   const expired = taipeiDay > report.end;
-  const status = expired ? '歷史週報。點有底色的品項找店家。' : '市場預測。點有底色的品項找店家。';
+  const status = expired ? '本期週報已過期。點有底色的品項找店家。' : '市場預測。點有底色的品項找店家。';
   const rows = element('dl', '', 'weekly-rows');
   for (const [key, label] of reportGroups) {
     const group = report.groups[key];
@@ -223,7 +223,7 @@ function showPriceCards(reports) {
   for (const section of reportSections) {
     const report = reports[section.key];
     const wrapper = element('section', '', 'price-section');
-    const suffix = taipeiDay > report.end ? '（週報已存檔）' : '';
+    const suffix = taipeiDay > report.end ? '（週報已過期）' : '';
     wrapper.append(element('h2', section.label + ' ' + reportPeriod(report) + suffix));
     const grid = element('div', '', 'grid');
     const foods = new Map();
