@@ -176,7 +176,9 @@ function reportPeriod(report) {
 function renderWeeklyReport(section, report) {
   const period = reportPeriod(report);
   const homeLabel = $('home-' + section.period);
-  if (homeLabel) homeLabel.textContent = section.label + ' ' + period;
+  if (homeLabel) {
+    homeLabel.textContent = section.label + ' ' + period + (taipeiDay > report.end ? '（已存檔）' : '');
+  }
   const content = $(section.content);
   if (!content) return;
   $(section.period).textContent = period;
@@ -294,6 +296,7 @@ function renderFarms() {
   if (homeResults) {
     homeResults.hidden = !query;
     $('shop-ideas').hidden = Boolean(query);
+    if ($('home-cheapest')) $('home-cheapest').hidden = Boolean(query);
   }
   if (!directoryReady || (homeResults && !query)) return;
   renderSuggestions(query, category);
@@ -432,21 +435,67 @@ async function loadFarms() {
   }
 }
 
+async function loadMarketSnapshot() {
+  const response = await fetch('tapmc-quotes.json', {cache: 'no-cache'});
+  if (!response.ok) throw new Error('行情讀取失敗');
+  const snapshot = await response.json();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(snapshot.tradeDate) ||
+      !Array.isArray(snapshot.records) || !snapshot.records.length) {
+    throw new Error('無交易資料');
+  }
+  return snapshot;
+}
+
+async function showHomeCheapest() {
+  const status = $('cheapest-status');
+  try {
+    const {tradeDate, records} = await loadMarketSnapshot();
+    const current = tradeDate === taipeiDay;
+    $('cheapest-title').textContent = current ? '今日蔬果最低批發價' : '最近交易日蔬果最低批發價';
+    const date = tradeDate.replaceAll('-', '/');
+    status.textContent = sentenceLines((current ? '交易日 ' + date : '目前顯示最近交易日 ' + date) +
+      '。依每公斤均價排序，同價時成交量多者優先。');
+    const sections = [];
+    for (const [category, tone] of [['蔬菜', 'green'], ['水果', 'orange']]) {
+      const rows = records.filter((record) => record.category === category && record.unit === '公斤')
+        .sort((a, b) => a.price - b.price || b.quantity - a.quantity);
+      const seen = new Set();
+      const list = element('ol', '', 'cheapest-items');
+      for (const record of rows) {
+        if (seen.has(record.baseName)) continue;
+        seen.add(record.baseName);
+        const item = element('li', '');
+        item.append(
+          element('strong', record.name),
+          element('span', 'NT$ ' + number.format(record.price) + '／公斤', 'price')
+        );
+        list.append(item);
+        if (seen.size === 3) break;
+      }
+      const section = element('div', '', 'cheapest-group');
+      section.append(element('h3', category, 'seasonal-label tone-' + tone), list);
+      sections.push(section);
+    }
+    $('cheapest-groups').replaceChildren(...sections);
+  } catch {
+    status.textContent = '暫時無法載入北農行情。';
+  }
+}
+
 async function loadPrices(cards) {
   try {
-    const response = await fetch('tapmc-quotes.json', {cache: 'no-cache'});
-    if (!response.ok) throw new Error('行情讀取失敗');
-    const {tradeDate, records} = await response.json();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(tradeDate) || !Array.isArray(records) || !records.length) {
-      throw new Error('無交易資料');
-    }
+    const {tradeDate, records} = await loadMarketSnapshot();
     $('quote-status').textContent = '北農資料交易日 ' + tradeDate.replaceAll('-', '/');
     for (const {item, quote} of cards) {
+      const seen = new Set();
       const matching = records.filter((record) => {
+        if (seen.has(record.code)) return false;
         const codeMatch = item.quoteCodes?.includes(record.code);
         const nameMatch = item.quoteNames?.some((name) => record.name.includes(name)) &&
           !record.name.includes('進口');
-        return codeMatch || nameMatch;
+        if (!codeMatch && !nameMatch) return false;
+        seen.add(record.code);
+        return true;
       });
       if (!matching.length) {
         quote.textContent = '北農該日資料未列此品項';
@@ -513,6 +562,7 @@ if ($('filters')) {
 }
 if ($('filters') || $('picks')) loadFarms();
 if ($('home-vegetable-period') || $('vegetable-weekly-content') || $('quotes')) loadWeeklyReports();
+if ($('cheapest-status')) showHomeCheapest();
 
 const sourceReturn = $('source-return');
 if (sourceReturn) {

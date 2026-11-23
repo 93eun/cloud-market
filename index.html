@@ -6,8 +6,8 @@
 <meta name="description" content="台灣小農購買指南，依節氣找當季蔬果、參考批發行情，直接前往小農的購買管道。">
 <meta name="theme-color" content="#f8f5ed">
 <title>雲端菜市場</title>
-<link rel="stylesheet" href="market.css?v=18">
-<script defer src="market.js?v=18"></script>
+<link rel="stylesheet" href="market.css?v=19">
+<script defer src="market.js?v=19"></script>
 </head>
 <body>
 <aside class="safety-banner" aria-label="防詐提醒">
@@ -43,6 +43,13 @@
     <p id="no-results" hidden><a href="farms.html">逛小農名錄</a>　<a href="season.html">看當季推薦</a></p>
   <div class="grid farm-grid" id="farms"></div>
     <button id="more" type="button" hidden>顯示更多店家</button>
+  </section>
+
+  <section id="home-cheapest" class="home-cheapest" aria-labelledby="cheapest-title">
+    <h2 id="cheapest-title">蔬果最低批發價</h2>
+    <p class="meta sentence-lines" id="cheapest-status" role="status">正在讀取北農行情。</p>
+    <div class="cheapest-groups" id="cheapest-groups"></div>
+    <p class="meta"><a href="https://www.tapmc.com.tw/Pages/Trans/Price1">北農第二市場單日交易行情</a></p>
   </section>
 
   <section id="shop-ideas" class="ideas" aria-labelledby="ideas-title">
